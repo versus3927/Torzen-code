@@ -8,6 +8,38 @@ export default function MobileNature() {
 
   return (
     <div className="mobile-nature" aria-hidden="true">
+      {/* Чистое тёмное небо: статичный CSS-градиент без canvas и blur */}
+      <div className="mn-sky" />
+
+      {/* Облегчённый спутник: один SVG, анимируется только transform */}
+      <svg className="mn-satellite" viewBox="0 0 112 52" fill="none">
+        <path d="M42 26H15M70 26H97" stroke="rgba(205,220,232,.72)" strokeWidth="1.4" />
+        <rect x="2" y="16" width="39" height="20" rx="1.5" fill="#123c70" stroke="rgba(95,180,225,.7)" />
+        <rect x="71" y="16" width="39" height="20" rx="1.5" fill="#123c70" stroke="rgba(95,180,225,.7)" />
+        <path d="M10 16V36M18 16V36M26 16V36M34 16V36M79 16V36M87 16V36M95 16V36M103 16V36M2 26H41M71 26H110" stroke="rgba(115,185,225,.42)" strokeWidth=".7" />
+        <rect x="42" y="17" width="28" height="18" rx="3" fill="#7b8b9b" stroke="rgba(235,242,245,.72)" />
+        <rect x="45" y="20" width="9" height="12" rx="1" fill="#c59035" />
+        <circle cx="63" cy="25" r="2" fill="#73e4e1" />
+        <path d="M56 17V10M48 7C51 14 61 14 64 7M56 7V3" stroke="rgba(225,235,240,.8)" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+
+      {/* Одна небольшая ракета с CSS-выхлопом */}
+      <svg className="mn-rocket" viewBox="0 0 82 34" fill="none">
+        <path d="M22 12L8 17L22 22" fill="url(#mn-flame)" />
+        <path d="M20 10H55C64 10 72 13 77 17C72 21 64 24 55 24H20V10Z" fill="url(#mn-body)" />
+        <path d="M28 10L18 3H39L43 10M28 24L18 31H39L43 24" fill="#b83f38" />
+        <rect x="50" y="10" width="7" height="14" fill="#b83f38" opacity=".9" />
+        <circle cx="64" cy="17" r="3.2" fill="#67c8e8" stroke="rgba(230,250,255,.8)" />
+        <defs>
+          <linearGradient id="mn-flame" x1="8" y1="17" x2="24" y2="17" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#448bd9" stopOpacity="0" /><stop offset=".55" stopColor="#6cd7ef" /><stop offset="1" stopColor="#ffd89a" />
+          </linearGradient>
+          <linearGradient id="mn-body" x1="40" y1="10" x2="40" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#f1f4f5" /><stop offset=".5" stopColor="#abb8c3" /><stop offset="1" stopColor="#536273" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       {/* ── Фоновые световые пятна (свечение листвы) ── */}
       <div className="mn-glow mn-glow-l1" />
       <div className="mn-glow mn-glow-l2" />
@@ -43,6 +75,36 @@ export default function MobileNature() {
         <ellipse cx="40" cy="78" rx="26" ry="26" fill="#1e4512" opacity="0.6"/>
         <ellipse cx="20" cy="102" rx="18" ry="18" fill="#1a3e10" opacity="0.45"/>
         <ellipse cx="56" cy="104" rx="20" ry="20" fill="#214d14" opacity="0.45"/>
+      </svg>
+
+      {/* Статичные горы: один путь, нулевая стоимость анимации */}
+      <svg className="mn-mountains" viewBox="0 0 400 110" preserveAspectRatio="none" fill="none">
+        <path d="M0 110L0 81L50 49L82 71L133 22L175 66L224 35L271 74L321 42L400 86V110H0Z" fill="url(#mn-mountain-fill)" />
+        <path d="M0 81L50 49L82 71L133 22L175 66L224 35L271 74L321 42L400 86" stroke="rgba(100,190,180,.32)" strokeWidth="1" />
+        <path d="M120 39L133 22L146 39L137 35L133 42L129 34Z" fill="rgba(225,235,245,.22)" />
+        <defs>
+          <linearGradient id="mn-mountain-fill" x1="200" y1="20" x2="200" y2="110" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#245f62" stopOpacity=".38" /><stop offset="1" stopColor="#102e35" stopOpacity=".1" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Статичный ручей и два силуэта животных */}
+      <div className="mn-stream" />
+      <svg className="mn-animal mn-deer" viewBox="0 0 58 36" fill="none">
+        <path d="M10 29L14 18M19 29L22 19M37 29L35 18M44 29L41 17" stroke="rgba(241,176,105,.7)" strokeWidth="1.5" strokeLinecap="round" />
+        <ellipse cx="28" cy="16" rx="16" ry="7" fill="rgba(241,176,105,.64)" />
+        <path d="M40 15Q44 8 46 5" stroke="rgba(241,176,105,.7)" strokeWidth="2" strokeLinecap="round" />
+        <ellipse cx="48" cy="5" rx="5" ry="3" fill="rgba(241,176,105,.7)" />
+        <path d="M49 2L53 0M48 2L47 0M51 1L54 4" stroke="rgba(143,241,207,.68)" strokeWidth="1" strokeLinecap="round" />
+      </svg>
+      <svg className="mn-animal mn-fox" viewBox="0 0 62 32" fill="none">
+        <ellipse cx="31" cy="15" rx="15" ry="6" fill="rgba(240,118,39,.68)" />
+        <path d="M43 14L53 8L50 16Z" fill="rgba(240,118,39,.72)" />
+        <path d="M47 10L49 4L53 9" fill="rgba(240,118,39,.72)" />
+        <path d="M17 14Q5 7 2 17Q9 20 18 18" fill="rgba(240,118,39,.65)" />
+        <path d="M24 19L22 29M31 20L32 29M39 19L42 28" stroke="rgba(240,118,39,.72)" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="51" cy="11" r="1" fill="#eaf9ff" />
       </svg>
 
       {/* ── Трава по низу ── */}
