@@ -27,7 +27,6 @@ interface Tree   { x: number; h: number; kind: 0 | 1 | 2; hue: number; phase: nu
 interface Leaf   { x: number; y: number; vx: number; vy: number; rot: number; rs: number; size: number; op: number; hue: number; sat: number; light: number }
 interface Bird   { x: number; y: number; vx: number; phase: number; size: number; op: number; hue: number }
 interface Deer   { x: number; vx: number; dir: 1 | -1; legPhase: number; size: number; op: number; alert: number; boost: number }
-interface Cloud  { x: number; y: number; r: number; vx: number; puffs: { dx: number; dy: number; r: number }[]; op: number; hue: number }
 interface Ridge  { pts: { x: number; y: number }[]; drift: number; speed: number; base: number; amp: number }
 interface Flow   { x: number; lane: number; len: number; vx: number; op: number; hue: number }
 interface Ripple { x: number; y: number; r: number; max: number; op: number }
@@ -38,15 +37,9 @@ interface Firefly{ x: number; y: number; ax: number; ay: number; phase: number; 
 interface Flutter{ ax: number; ay: number; phase: number; vx: number; hue: number; size: number; scare: number }
 interface Seed   { x: number; y: number; vy: number; phase: number; op: number }
 interface Star   { x: number; y: number; r: number; phase: number; speed: number; hue: number }
-interface SpaceDust { x: number; y: number; r: number; hue: number; op: number; phase: number; speed: number }
-interface Nebula { x: number; y: number; rx: number; ry: number; hueA: number; hueB: number; phase: number; drift: number; op: number; angle: number }
-interface Constellation { points: { x: number; y: number }[]; links: [number, number][]; hue: number; pulse: number }
-interface Galaxy {
-  x: number; y: number; r: number; tilt: number; hue: number; phase: number; speed: number; pulse: number;
-  stars: { a: number; d: number; arm: number; size: number; op: number; hueShift: number }[];
-}
+interface Satellite { x: number; y: number; vx: number; vy: number; scale: number; angle: number; phase: number; signal: number; boost: number; kind: 0 | 1 | 2 }
+interface Rocket { x: number; y: number; vx: number; vy: number; scale: number; phase: number; boost: number; kind: 0 | 1 }
 interface Mist   { y: number; w: number; x: number; vx: number; op: number; hue: number }
-interface Orb    { x: number; y: number; r: number; vx: number; vy: number; hue: number; op: number; phase: number }
 interface Mush   { x: number; scale: number; hue: number; pop: number }
 interface Rock   { x: number; y: number; w: number; h: number; hue: number; shake: number; inWater: boolean }
 interface Reed   { x: number; h: number; phase: number }
@@ -158,19 +151,19 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   // Листья
   const leafHues = [18, 30, 42, 52, 8, 95, 130];
   const leaves: Leaf[] = Array.from({ length: 30 }, () => ({
-    x: rand(0, W), y: rand(0, H), vx: rand(-0.18, 0.18), vy: rand(0.12, 0.4),
+    x: rand(0, W), y: rand(H * 0.52, H), vx: rand(-0.18, 0.18), vy: rand(0.12, 0.4),
     rot: rand(0, TAU), rs: rand(-0.009, 0.009), size: rand(4, 10), op: rand(0.4, 0.75),
     hue: pick(leafHues), sat: rand(70, 95), light: rand(45, 62),
   }));
 
   // Птицы
   const birds: Bird[] = Array.from({ length: 7 }, (_, i) => ({
-    x: -100 - i * rand(160, 400), y: rand(50, 240), vx: rand(0.35, 0.65),
+    x: -100 - i * rand(160, 400), y: rand(H * 0.52, H * 0.67), vx: rand(0.35, 0.65),
     phase: rand(0, TAU), size: rand(9, 14), op: rand(0.4, 0.65), hue: rand(190, 230),
   }));
 
   // Орёл
-  const eagle = { cx: W * 0.7, cy: 130, r: 110, ang: rand(0, TAU), speed: 0.0042, size: 1.5, drift: rand(0.04, 0.07), boost: 0 };
+  const eagle = { cx: W * 0.7, cy: H * 0.58, r: 72, ang: rand(0, TAU), speed: 0.0042, size: 1.5, drift: rand(0.04, 0.07), boost: 0 };
 
   // Олени
   const deer: Deer[] = [
@@ -198,116 +191,35 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
 
   // Бабочки / стрекоза / светлячки
   const flutters: Flutter[] = Array.from({ length: 5 }, (_, i) => ({
-    ax: rand(100, W - 100), ay: rand(H * 0.25, H * 0.8), phase: i * 1.7,
+    ax: rand(100, W - 100), ay: rand(H * 0.56, H * 0.82), phase: i * 1.7,
     vx: rand(0.2, 0.5), hue: [15, 40, 200, 280, 330][i % 5], size: rand(0.9, 1.5), scare: 0,
   }));
   const dragonfly = { x: W * 0.5, y: H * 0.6, tx: W * 0.5, ty: H * 0.6, wing: 0, zip: 0 };
   const fireflies: Firefly[] = Array.from({ length: 18 }, () => ({
-    x: rand(0, W), y: rand(0, H), ax: rand(0, W), ay: rand(H * 0.3, H * 0.95),
+    x: rand(0, W), y: rand(H * 0.54, H), ax: rand(0, W), ay: rand(H * 0.56, H * 0.95),
     phase: rand(0, TAU), speed: rand(0.2, 0.5), r: rand(1.4, 2.8),
     hue: Math.random() > 0.3 ? rand(45, 62) : rand(160, 185), flash: 0,
   }));
 
-  // Сферы света, семена и многослойный космос
-  const orbs: Orb[] = Array.from({ length: 7 }, () => ({
-    x: rand(0, W), y: rand(H * 0.1, H * 0.9), r: rand(60, 170),
-    vx: rand(-0.14, 0.14), vy: rand(-0.07, 0.07),
-    hue: pick([160, 190, 275, 330, 45, 120, 210]), op: rand(0.05, 0.11), phase: rand(0, TAU),
-  }));
+  // Семена и чистый звёздный фон без планет и декоративных космических объектов.
   const seeds: Seed[] = Array.from({ length: 14 }, () => ({
-    x: rand(0, W), y: rand(0, H), vy: rand(0.06, 0.2), phase: rand(0, TAU), op: rand(0.25, 0.5),
+    x: rand(0, W), y: rand(H * 0.52, H), vy: rand(0.06, 0.2), phase: rand(0, TAU), op: rand(0.25, 0.5),
   }));
-  const stars: Star[] = Array.from({ length: 94 }, () => ({
-    x: rand(0, W), y: rand(0, H * 0.5), r: rand(0.7, 1.9), phase: rand(0, TAU),
-    speed: rand(0.01, 0.035), hue: pick([195, 45, 280, 0, 160]),
-  }));
-
-  // Мелкая космическая пыль хранится в относительных координатах и не ломается при resize.
-  const spaceDust: SpaceDust[] = Array.from({ length: 148 }, () => ({
-    x: rand(0, 1),
-    y: rand(0.015, 0.49),
-    r: rand(0.25, 1.15),
-    hue: pick([185, 205, 225, 265, 305, 42]),
-    op: rand(0.08, 0.38),
-    phase: rand(0, TAU),
-    speed: rand(0.003, 0.018),
+  const stars: Star[] = Array.from({ length: 92 }, () => ({
+    x: rand(0, W), y: rand(0, H * 0.5), r: rand(0.35, 1.55), phase: rand(0, TAU),
+    speed: rand(0.006, 0.026), hue: pick([190, 205, 220, 45]),
   }));
 
-  // Туманности образуют глубину: холодный дальний слой и тёплые цветовые ядра.
-  const nebulae: Nebula[] = [
-    { x: 0.13, y: 0.14, rx: 0.28, ry: 0.16, hueA: 205, hueB: 275, phase: 0.4, drift: 0.0018, op: 0.105, angle: -0.25 },
-    { x: 0.56, y: 0.09, rx: 0.34, ry: 0.14, hueA: 285, hueB: 328, phase: 2.3, drift: 0.0013, op: 0.085, angle: 0.18 },
-    { x: 0.88, y: 0.3,  rx: 0.23, ry: 0.17, hueA: 165, hueB: 205, phase: 4.4, drift: 0.0016, op: 0.095, angle: -0.42 },
-    { x: 0.4,  y: 0.34, rx: 0.2,  ry: 0.11, hueA: 25,  hueB: 325, phase: 1.2, drift: 0.0011, op: 0.05, angle: 0.34 },
+  const satellites: Satellite[] = [
+    { x: W * 0.14, y: H * 0.13, vx: 0.055, vy: 0.006, scale: 1, angle: -0.12, phase: 0.3, signal: 0, boost: 0, kind: 0 },
+    { x: W * 0.72, y: H * 0.22, vx: -0.038, vy: -0.004, scale: 0.76, angle: 0.17, phase: 2.2, signal: 0, boost: 0, kind: 1 },
+    { x: W * 0.48, y: H * 0.075, vx: 0.028, vy: 0.002, scale: 0.58, angle: -0.28, phase: 4.1, signal: 0, boost: 0, kind: 2 },
   ];
 
-  // Пыль Млечного Пути лежит вдоль диагонали и медленно дрейфует.
-  const galaxyDust = Array.from({ length: 145 }, () => {
-    const x = rand(-0.12, 1.12);
-    const spread = (Math.random() + Math.random() - 1) * 0.105;
-    return { x, y: 0.055 + x * 0.31 + spread, r: rand(0.3, 1.45), op: rand(0.1, 0.55), hue: pick([195, 220, 265, 315, 40]) };
-  });
-
-  const constellations: Constellation[] = [
-    {
-      points: [{ x: .08, y: .1 }, { x: .125, y: .135 }, { x: .17, y: .12 }, { x: .205, y: .17 }, { x: .245, y: .145 }, { x: .28, y: .19 }],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [1, 3]], hue: 195, pulse: 0,
-    },
-    {
-      points: [{ x: .58, y: .18 }, { x: .62, y: .135 }, { x: .665, y: .16 }, { x: .69, y: .215 }, { x: .735, y: .235 }, { x: .71, y: .28 }],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [3, 5]], hue: 275, pulse: 0,
-    },
-    {
-      points: [{ x: .34, y: .29 }, { x: .375, y: .25 }, { x: .415, y: .28 }, { x: .45, y: .245 }, { x: .49, y: .275 }],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4]], hue: 43, pulse: 0,
-    },
+  const rockets: Rocket[] = [
+    { x: -90, y: H * 0.34, vx: 0.38, vy: -0.055, scale: 0.9, phase: 0, boost: 0, kind: 0 },
+    { x: W * 0.84, y: H * 0.46, vx: 0.12, vy: -0.31, scale: 0.68, phase: 1.7, boost: 0, kind: 1 },
   ];
-
-  const makeGalaxy = (x: number, y: number, r: number, tilt: number, hue: number, phase: number): Galaxy => ({
-    x, y, r, tilt, hue, phase, speed: rand(0.0007, 0.0016), pulse: 0,
-    stars: Array.from({ length: 62 }, (_, i) => {
-      const d = Math.pow(Math.random(), 0.72);
-      return {
-        a: rand(0, TAU), d,
-        arm: i % 3,
-        size: rand(0.28, 1.05) * (1.2 - d * 0.35),
-        op: rand(0.18, 0.68) * (1.1 - d * 0.25),
-        hueShift: rand(-28, 32),
-      };
-    }),
-  });
-  const galaxies: Galaxy[] = [
-    makeGalaxy(0.355, 0.095, 30, -0.28, 205, 0.2),
-    makeGalaxy(0.705, 0.265, 23, 0.38, 285, 2.1),
-    makeGalaxy(0.945, 0.075, 17, -0.46, 32, 4.2),
-  ];
-
-  const starCluster = Array.from({ length: 44 }, () => {
-    const a = rand(0, TAU), d = Math.pow(Math.random(), 1.7);
-    return { a, d, r: rand(0.35, 1.2), hue: pick([190, 205, 225, 270, 42]), phase: rand(0, TAU) };
-  });
-
-  const blackHole = { x: 0.515, y: 0.13, phase: 0, pulse: 0 };
-
-  const moon = {
-    x: 0.84, y: 0.145, phase: 0, pulse: 0,
-    craters: Array.from({ length: 24 }, () => ({ x: rand(-0.64, 0.57), y: rand(-0.62, 0.62), r: rand(0.025, 0.12), op: rand(0.07, 0.22) })),
-    texture: Array.from({ length: 38 }, () => ({ x: rand(-0.86, 0.86), y: rand(-0.86, 0.86), r: rand(0.006, 0.025), op: rand(0.04, 0.14) })),
-  };
-  const ringPlanet = { x: 0.18, y: 0.275, phase: 0, pulse: 0, tilt: -0.24 };
-  const asteroids = Array.from({ length: 24 }, () => ({
-    a: rand(0, TAU), orbit: rand(2.7, 4.3), speed: rand(0.0008, 0.0022) * (Math.random() > 0.5 ? 1 : -1),
-    size: rand(0.6, 2.2), yScale: rand(0.24, 0.42), hue: rand(195, 255), phase: rand(0, TAU),
-  }));
-  const deepComet = { x: W * 1.12, y: H * 0.08, vx: -0.55, vy: 0.075, phase: 0, pulse: 0 };
-  const meteor = { active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, next: 300 };
-  const clouds: Cloud[] = Array.from({ length: 5 }, (_, i) => {
-    const r = rand(60, 140);
-    return { x: rand(-200, W + 200), y: rand(40, H * 0.32), r,
-      vx: rand(0.08, 0.22) * (i % 2 === 0 ? 1 : 1.4), op: rand(0.07, 0.13),
-      hue: i % 2 === 0 ? rand(255, 290) : rand(195, 215),
-      puffs: Array.from({ length: 4 }, () => ({ dx: rand(-r, r), dy: rand(-r * 0.28, r * 0.28), r: rand(r * 0.5, r) })) };
-  });
   const mists: Mist[] = Array.from({ length: 4 }, (_, i) => ({
     y: rand(0.74, 0.92), w: rand(0.35, 0.65), x: rand(0, 1),
     vx: rand(0.0004, 0.0012) * (i % 2 ? 1 : -1), op: rand(0.07, 0.13),
@@ -323,7 +235,6 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   };
   const ridgeFar = makeRidge(0.78, 0.17, 0.006);
   const ridgeNear = makeRidge(0.9, 0.11, 0.011);
-  let auroraPulse = 0;
 
   // Вода
   const flows: Flow[] = Array.from({ length: 34 }, () => ({
@@ -384,8 +295,6 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       if (!interacted) { interacted = true; opts.onInteract?.(); }
       return;
     }
-    // клик по небу — искорки
-    sparks(e.clientX, e.clientY, 8, rand(40, 300), 0.7);
   };
 
   window.addEventListener("pointerdown", onDown, true);
@@ -399,12 +308,12 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     const dir = side === "l" ? 1 : -1;
     const base = side === "l" ? 0 : W;
     const spots = side === "l"
-      ? [{ yR: 0.1, r: 210, a: 0.3, ph: 0, col: "70,200,120" },
-         { yR: 0.4, r: 230, a: 0.26, ph: 1.5, col: "40,185,165" },
-         { yR: 0.7, r: 200, a: 0.28, ph: 3, col: "95,210,105" }]
-      : [{ yR: 0.15, r: 210, a: 0.26, ph: 0.7, col: "60,175,215" },
-         { yR: 0.45, r: 230, a: 0.24, ph: 2.1, col: "150,110,230" },
-         { yR: 0.75, r: 200, a: 0.27, ph: 3.8, col: "55,195,180" }];
+      ? [{ yR: 0.62, r: 190, a: 0.22, ph: 0, col: "70,200,120" },
+         { yR: 0.79, r: 210, a: 0.24, ph: 1.5, col: "40,185,165" },
+         { yR: 0.94, r: 180, a: 0.25, ph: 3, col: "95,210,105" }]
+      : [{ yR: 0.64, r: 190, a: 0.2, ph: 0.7, col: "60,175,215" },
+         { yR: 0.8, r: 210, a: 0.22, ph: 2.1, col: "150,110,230" },
+         { yR: 0.95, r: 180, a: 0.24, ph: 3.8, col: "55,195,180" }];
     spots.forEach(s => {
       const cx = base + dir * 35 + Math.sin(t + s.ph) * 14;
       const cy = H * s.yR;
@@ -470,9 +379,8 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
           ctx.closePath(); ctx.fill();
         }
       });
-      // интерактив: клик по горам — вспышка сияния
+      // Интерактивная волна по вершинам.
       hit(W * 0.5, baseY - H * r.amp * 0.6, 70, "Горы", () => {
-        auroraPulse = 1;
         ring(W * 0.5, baseY - H * r.amp * 0.6, 270, 160, 0.012);
       });
     }
@@ -565,6 +473,205 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     });
   };
 
+  const drawSatellite = (sat: Satellite, t: number) => {
+    sat.phase += 0.009;
+    sat.signal *= 0.97;
+    sat.boost *= 0.96;
+    sat.x += sat.vx * (1 + sat.boost * 3);
+    sat.y += sat.vy;
+
+    if (sat.vx >= 0 && sat.x > W + 90) { sat.x = -90; sat.y = rand(H * 0.06, H * 0.28); }
+    if (sat.vx < 0 && sat.x < -90) { sat.x = W + 90; sat.y = rand(H * 0.08, H * 0.3); }
+
+    const s = sat.scale;
+    const panelLen = (sat.kind === 0 ? 30 : sat.kind === 1 ? 25 : 20) * s;
+    const panelH = (sat.kind === 2 ? 7 : 9) * s;
+    const busW = (sat.kind === 2 ? 10 : 14) * s;
+    const busH = (sat.kind === 1 ? 13 : 11) * s;
+    const wobble = Math.sin(t * 0.008 + sat.phase) * 0.025;
+
+    ctx.save();
+    ctx.translate(sat.x, sat.y);
+    ctx.rotate(sat.angle + wobble);
+    ctx.globalAlpha = 0.72 + sat.signal * 0.2;
+
+    // Тонкие фермы соединяют корпус с солнечными батареями.
+    ctx.strokeStyle = "rgba(185,205,225,0.8)";
+    ctx.lineWidth = 1.2 * s;
+    ctx.beginPath();
+    ctx.moveTo(-busW, 0); ctx.lineTo(-busW - panelLen - 3 * s, 0);
+    ctx.moveTo(busW, 0); ctx.lineTo(busW + panelLen + 3 * s, 0);
+    ctx.stroke();
+
+    for (const side of [-1, 1]) {
+      const px = side * (busW + panelLen * 0.55 + 3 * s);
+      const pg = ctx.createLinearGradient(px - panelLen * 0.5, 0, px + panelLen * 0.5, 0);
+      pg.addColorStop(0, "rgba(20,55,115,0.95)");
+      pg.addColorStop(0.5, "rgba(35,105,175,0.95)");
+      pg.addColorStop(1, "rgba(30,65,135,0.95)");
+      ctx.fillStyle = pg;
+      ctx.strokeStyle = "rgba(100,175,225,0.8)";
+      ctx.lineWidth = 0.75 * s;
+      ctx.beginPath();
+      ctx.rect(px - panelLen * 0.5, -panelH * 0.5, panelLen, panelH);
+      ctx.fill(); ctx.stroke();
+      // Сетка фотоэлементов.
+      ctx.globalAlpha *= 0.7;
+      for (let col = 1; col < 5; col++) {
+        const gx = px - panelLen * 0.5 + panelLen * col / 5;
+        ctx.beginPath(); ctx.moveTo(gx, -panelH * 0.5); ctx.lineTo(gx, panelH * 0.5); ctx.stroke();
+      }
+      ctx.beginPath(); ctx.moveTo(px - panelLen * 0.5, 0); ctx.lineTo(px + panelLen * 0.5, 0); ctx.stroke();
+      ctx.globalAlpha = 0.72 + sat.signal * 0.2;
+    }
+
+    // Металлический приборный отсек.
+    const body = ctx.createLinearGradient(-busW, -busH, busW, busH);
+    body.addColorStop(0, "rgba(225,235,240,0.96)");
+    body.addColorStop(0.45, "rgba(125,145,165,0.96)");
+    body.addColorStop(1, "rgba(55,70,90,0.98)");
+    ctx.fillStyle = body;
+    ctx.strokeStyle = "rgba(235,245,250,0.72)";
+    ctx.lineWidth = 0.8 * s;
+    ctx.beginPath();
+    ctx.roundRect(-busW, -busH * 0.5, busW * 2, busH, 2.2 * s);
+    ctx.fill(); ctx.stroke();
+
+    // Теплоизоляционная золотая панель и маленькие приборы.
+    ctx.fillStyle = "rgba(210,155,55,0.88)";
+    ctx.fillRect(-busW * 0.52, -busH * 0.38, busW * 0.58, busH * 0.76);
+    ctx.fillStyle = "rgba(85,225,220,0.9)";
+    ctx.beginPath(); ctx.arc(busW * 0.5, -busH * 0.08, 1.25 * s, 0, TAU); ctx.fill();
+
+    if (sat.kind !== 2) {
+      // Параболическая антенна.
+      ctx.strokeStyle = "rgba(215,225,235,0.9)";
+      ctx.lineWidth = 1.05 * s;
+      ctx.beginPath(); ctx.moveTo(0, -busH * 0.5); ctx.lineTo(0, -busH * 1.25); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, -busH * 1.35, 6.2 * s, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -busH * 1.35); ctx.lineTo(0, -busH * 1.75); ctx.stroke();
+      ctx.fillStyle = "rgba(120,220,245,0.9)";
+      ctx.beginPath(); ctx.arc(0, -busH * 1.78, 1.1 * s, 0, TAU); ctx.fill();
+    } else {
+      // У CubeSat длинная штыревая антенна.
+      ctx.strokeStyle = "rgba(205,225,235,0.85)";
+      ctx.lineWidth = 0.8 * s;
+      ctx.beginPath(); ctx.moveTo(busW * 0.5, -busH * 0.4); ctx.lineTo(busW * 1.7, -busH * 1.5); ctx.stroke();
+    }
+
+    if (sat.signal > 0.03) {
+      ctx.strokeStyle = `rgba(105,220,255,${sat.signal * 0.65})`;
+      ctx.lineWidth = 1 * s;
+      for (let wave = 1; wave <= 3; wave++) {
+        const rr = (8 + wave * 7 + (1 - sat.signal) * 12) * s;
+        ctx.beginPath();
+        ctx.arc(0, -busH * 1.75, rr, -2.25, -0.9);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    hit(sat.x, sat.y, (panelLen + busW) * 1.15, "Спутник", () => {
+      sat.signal = 1;
+      sat.boost = 1;
+    });
+  };
+
+  const drawRocket = (rocket: Rocket, t: number) => {
+    rocket.phase += 0.08;
+    rocket.boost *= 0.97;
+    const speed = 1 + rocket.boost * 2.5;
+    rocket.x += rocket.vx * speed;
+    rocket.y += rocket.vy * speed;
+
+    if (rocket.kind === 0 && (rocket.x > W + 110 || rocket.y < -80)) {
+      rocket.x = -90; rocket.y = rand(H * 0.28, H * 0.42);
+    }
+    if (rocket.kind === 1 && (rocket.y < -100 || rocket.x > W + 100)) {
+      rocket.x = rand(W * 0.7, W * 0.9); rocket.y = H * 0.5;
+    }
+
+    const s = rocket.scale;
+    const angle = Math.atan2(rocket.vy, rocket.vx);
+    const flame = (11 + Math.sin(rocket.phase) * 3 + rocket.boost * 10) * s;
+
+    // Полупрозрачный выхлоп быстро растворяется и не засоряет чистое небо.
+    ctx.save();
+    ctx.globalAlpha = 0.28 + rocket.boost * 0.22;
+    const tailX = rocket.x - Math.cos(angle) * 18 * s;
+    const tailY = rocket.y - Math.sin(angle) * 18 * s;
+    const trail = ctx.createLinearGradient(tailX, tailY,
+      tailX - Math.cos(angle) * 62 * s, tailY - Math.sin(angle) * 62 * s);
+    trail.addColorStop(0, "rgba(110,210,255,0.75)");
+    trail.addColorStop(0.35, "rgba(120,150,255,0.2)");
+    trail.addColorStop(1, "rgba(100,120,220,0)");
+    ctx.strokeStyle = trail;
+    ctx.lineWidth = 2.2 * s;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(tailX, tailY);
+    ctx.lineTo(tailX - Math.cos(angle) * 62 * s, tailY - Math.sin(angle) * 62 * s);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(rocket.x, rocket.y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = 0.82;
+
+    // Пламя двигателя.
+    const fg = ctx.createLinearGradient(-18 * s - flame, 0, -15 * s, 0);
+    fg.addColorStop(0, "rgba(80,170,255,0)");
+    fg.addColorStop(0.45, "rgba(80,210,255,0.7)");
+    fg.addColorStop(0.75, "rgba(255,170,65,0.9)");
+    fg.addColorStop(1, "rgba(255,250,225,1)");
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.moveTo(-15 * s, -3.2 * s);
+    ctx.lineTo((-18 * s) - flame, 0);
+    ctx.lineTo(-15 * s, 3.2 * s);
+    ctx.closePath(); ctx.fill();
+
+    // Корпус, носовой обтекатель и ступени.
+    const body = ctx.createLinearGradient(0, -6 * s, 0, 6 * s);
+    body.addColorStop(0, "rgba(245,248,250,0.98)");
+    body.addColorStop(0.5, "rgba(175,190,205,0.98)");
+    body.addColorStop(1, "rgba(75,90,115,0.98)");
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-15 * s, -5 * s);
+    ctx.lineTo(10 * s, -5 * s);
+    ctx.quadraticCurveTo(19 * s, -3.8 * s, 23 * s, 0);
+    ctx.quadraticCurveTo(19 * s, 3.8 * s, 10 * s, 5 * s);
+    ctx.lineTo(-15 * s, 5 * s);
+    ctx.closePath(); ctx.fill();
+
+    // Разметка ступени и контрастные стабилизаторы.
+    ctx.strokeStyle = "rgba(55,70,95,0.7)";
+    ctx.lineWidth = 0.8 * s;
+    ctx.beginPath(); ctx.moveTo(-3 * s, -5 * s); ctx.lineTo(-3 * s, 5 * s); ctx.stroke();
+    ctx.fillStyle = rocket.kind === 0 ? "rgba(210,55,45,0.92)" : "rgba(45,115,205,0.92)";
+    ctx.fillRect(5 * s, -5 * s, 3.8 * s, 10 * s);
+    ctx.beginPath();
+    ctx.moveTo(-12 * s, -4 * s); ctx.lineTo(-19 * s, -11 * s); ctx.lineTo(-4 * s, -4 * s); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-12 * s, 4 * s); ctx.lineTo(-19 * s, 11 * s); ctx.lineTo(-4 * s, 4 * s); ctx.closePath(); ctx.fill();
+
+    // Небольшой иллюминатор.
+    const windowG = ctx.createRadialGradient(12 * s, -1 * s, 0, 12 * s, 0, 2.6 * s);
+    windowG.addColorStop(0, "rgba(205,250,255,1)");
+    windowG.addColorStop(1, "rgba(30,105,165,0.95)");
+    ctx.fillStyle = windowG;
+    ctx.beginPath(); ctx.arc(12 * s, 0, 2.6 * s, 0, TAU); ctx.fill();
+    ctx.restore();
+
+    hit(rocket.x, rocket.y, 27 * s, "Ракета", () => {
+      rocket.boost = 1;
+    });
+  };
+
   /* ═══════════ main loop ═══════════ */
 
   let tick = 0;
@@ -579,658 +686,53 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
 
     ctx.clearRect(0, 0, W, H);
 
-    /* ── глубокий космический фон ── */
+    /* ── чистое тёмное небо: только звёзды, спутники и ракеты ── */
     {
       const sky = ctx.createLinearGradient(0, 0, 0, H * 0.58);
-      sky.addColorStop(0, "rgba(0,1,11,0.82)");
-      sky.addColorStop(0.42, "rgba(3,4,23,0.68)");
-      sky.addColorStop(0.78, "rgba(4,17,31,0.34)");
+      sky.addColorStop(0, "rgba(0,1,8,0.92)");
+      sky.addColorStop(0.42, "rgba(1,3,16,0.82)");
+      sky.addColorStop(0.78, "rgba(3,12,24,0.54)");
       sky.addColorStop(1, "rgba(4,16,24,0)");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H * 0.58);
 
-      // Очень слабая синяя засветка горизонта связывает небо с горами.
-      const horizon = ctx.createLinearGradient(0, H * 0.28, 0, H * 0.62);
-      horizon.addColorStop(0, "rgba(35,70,125,0)");
-      horizon.addColorStop(0.62, "rgba(25,65,95,0.06)");
-      horizon.addColorStop(1, "rgba(20,65,75,0)");
-      ctx.fillStyle = horizon;
-      ctx.fillRect(0, H * 0.25, W, H * 0.4);
+      // Незаметная виньетка делает центр глубоким, не добавляя новых объектов.
+      const vignette = ctx.createRadialGradient(W * 0.5, H * 0.18, W * 0.08,
+        W * 0.5, H * 0.18, W * 0.68);
+      vignette.addColorStop(0, "rgba(6,12,28,0)");
+      vignette.addColorStop(0.68, "rgba(0,2,10,0.08)");
+      vignette.addColorStop(1, "rgba(0,0,5,0.38)");
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, W, H * 0.56);
     }
 
-    /* ── объёмные туманности ── */
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-    for (const n of nebulae) {
-      n.phase += n.drift;
-      const nx = (n.x + Math.sin(n.phase) * 0.012) * W;
-      const ny = (n.y + Math.cos(n.phase * 0.73) * 0.008) * H;
-      const rx = n.rx * W;
-      const ry = n.ry * H;
-
-      ctx.save();
-      ctx.translate(nx, ny);
-      ctx.rotate(n.angle + Math.sin(n.phase * 0.55) * 0.025);
-      ctx.scale(1, Math.max(0.12, ry / rx));
-
-      // Несколько смещённых газовых ядер дают туманности неидеальную живую форму.
-      for (let layer = 0; layer < 4; layer++) {
-        const lr = rx * (1 - layer * 0.12);
-        const lx = Math.sin(n.phase * (1.1 + layer * 0.08) + layer * 1.7) * rx * 0.13;
-        const ly = Math.cos(n.phase * 0.8 + layer * 2.1) * rx * 0.07;
-        const hue = layer % 2 === 0 ? n.hueA : n.hueB;
-        const g = ctx.createRadialGradient(lx - lr * 0.16, ly, 0, lx, ly, lr);
-        g.addColorStop(0, `hsla(${hue},88%,66%,${n.op * (0.72 - layer * 0.08)})`);
-        g.addColorStop(0.34, `hsla(${(hue + 22) % 360},82%,53%,${n.op * 0.42})`);
-        g.addColorStop(0.72, `hsla(${(hue - 18 + 360) % 360},75%,40%,${n.op * 0.13})`);
-        g.addColorStop(1, `hsla(${hue},80%,35%,0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(lx, ly, lr, 0, TAU); ctx.fill();
-      }
-      ctx.restore();
-    }
-    ctx.restore();
-
-    /* ── Млечный Путь: диагональная газовая лента и звёздная пыль ── */
-    {
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      ctx.translate(W * 0.5, H * 0.2);
-      ctx.rotate(0.29);
-      const band = ctx.createLinearGradient(0, -H * 0.16, 0, H * 0.16);
-      band.addColorStop(0, "rgba(120,150,235,0)");
-      band.addColorStop(0.28, "rgba(120,155,235,0.025)");
-      band.addColorStop(0.48, "rgba(225,215,255,0.052)");
-      band.addColorStop(0.52, "rgba(180,205,255,0.046)");
-      band.addColorStop(0.74, "rgba(130,135,230,0.025)");
-      band.addColorStop(1, "rgba(100,120,220,0)");
-      ctx.fillStyle = band;
-      ctx.fillRect(-W * 0.75, -H * 0.18, W * 1.5, H * 0.36);
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      for (const d of galaxyDust) {
-        const drift = Math.sin(t * 0.0018 + d.x * 9) * 2;
-        const x = d.x * W;
-        const y = d.y * H + drift;
-        if (y < 0 || y > H * 0.54) continue;
-        ctx.globalAlpha = d.op * (0.72 + Math.sin(t * 0.012 + d.x * 31) * 0.28);
-        ctx.fillStyle = `hsla(${d.hue},80%,82%,0.95)`;
-        ctx.beginPath(); ctx.arc(x, y, d.r, 0, TAU); ctx.fill();
-      }
-      ctx.restore();
-
-      // Неровные тёмные прожилки поглощающей пыли внутри Млечного Пути.
-      ctx.save();
-      ctx.translate(W * 0.5, H * 0.2);
-      ctx.rotate(0.29);
-      ctx.lineCap = "round";
-      for (let lane = 0; lane < 3; lane++) {
-        const off = (lane - 1) * 17;
-        ctx.globalAlpha = 0.11 - lane * 0.016;
-        ctx.strokeStyle = "rgba(0,1,12,0.95)";
-        ctx.lineWidth = 7 + lane * 5;
-        ctx.beginPath();
-        ctx.moveTo(-W * 0.72, off - 7);
-        ctx.bezierCurveTo(-W * 0.25, off + 18 + Math.sin(t * 0.001 + lane) * 4,
-          W * 0.18, off - 17, W * 0.72, off + 8);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    /* ── дальняя космическая пыль ── */
-    for (const d of spaceDust) {
-      d.phase += d.speed;
-      const x = d.x * W + Math.sin(d.phase * 0.45) * 1.2;
-      const y = d.y * H;
-      ctx.globalAlpha = d.op * (0.45 + Math.abs(Math.sin(d.phase)) * 0.55);
-      ctx.fillStyle = `hsla(${d.hue},75%,82%,0.9)`;
-      ctx.beginPath(); ctx.arc(x, y, d.r, 0, TAU); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    /* ── сияние ── */
-    auroraPulse *= 0.985;
-    ctx.save();
-    for (let band = 0; band < 3; band++) {
-      ctx.globalAlpha = (0.078 - band * 0.016) + Math.sin(t * 0.004 + band) * 0.026 + auroraPulse * 0.18;
-      ctx.beginPath();
-      const yTop = H * (0.02 + band * 0.05);
-      for (let x = 0; x <= W; x += 36) {
-        const y = yTop + Math.sin(x * 0.004 + t * 0.006 + band) * 28 + Math.sin(x * 0.011 - t * 0.004) * 15;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      for (let x = W; x >= 0; x -= 36) ctx.lineTo(x, yTop + H * 0.14 + Math.sin(x * 0.003 + t * 0.005 + 2 + band) * 32);
-      ctx.closePath();
-      const cols = [
-        ["rgba(70,255,170,0.95)", "rgba(60,200,255,0)"],
-        ["rgba(150,120,255,0.9)", "rgba(80,220,255,0)"],
-        ["rgba(255,120,200,0.8)", "rgba(120,160,255,0)"],
-      ][band];
-      const ag = ctx.createLinearGradient(0, yTop, 0, yTop + H * 0.2);
-      ag.addColorStop(0, cols[0]); ag.addColorStop(1, cols[1]);
-      ctx.fillStyle = ag; ctx.fill();
-    }
-    ctx.restore();
-
-    /* ── сферы боке ── */
-    for (const o of orbs) {
-      o.x += o.vx; o.y += o.vy; o.phase += 0.006;
-      if (o.x < -o.r) o.x = W + o.r;
-      if (o.x > W + o.r) o.x = -o.r;
-      if (o.y < -o.r) o.y = H + o.r;
-      if (o.y > H + o.r) o.y = -o.r;
-      ctx.save();
-      ctx.globalAlpha = o.op * (0.75 + Math.sin(o.phase) * 0.25);
-      const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
-      g.addColorStop(0, `hsla(${o.hue},90%,65%,0.9)`);
-      g.addColorStop(0.55, `hsla(${o.hue},90%,55%,0.22)`);
-      g.addColorStop(1, `hsla(${o.hue},90%,50%,0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, TAU); ctx.fill();
-      ctx.restore();
-    }
-
-    /* ── далёкие галактики: ядро, три спиральных рукава и звёздная россыпь ── */
-    for (const gal of galaxies) {
-      gal.phase += gal.speed * (1 + gal.pulse * 7);
-      gal.pulse *= 0.975;
-      const gx = gal.x * W, gy = gal.y * H;
-      const gr = gal.r * (1 + gal.pulse * 0.16);
-
-      ctx.save();
-      ctx.translate(gx, gy);
-      ctx.rotate(gal.tilt);
-      ctx.scale(1, 0.48);
-      ctx.globalCompositeOperation = "screen";
-
-      // Едва заметные рукава дают структуру даже в очень тёмном небе.
-      for (let arm = 0; arm < 3; arm++) {
-        ctx.globalAlpha = 0.09 + gal.pulse * 0.12;
-        ctx.strokeStyle = `hsla(${gal.hue + arm * 14},78%,68%,0.85)`;
-        ctx.lineWidth = 2.8 - arm * 0.45;
-        ctx.beginPath();
-        for (let k = 0; k <= 34; k++) {
-          const d = k / 34;
-          const a = gal.phase + arm * TAU / 3 + d * 5.25;
-          const rr = gr * 1.62 * d;
-          const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
-          k === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-      }
-
-      for (const st of gal.stars) {
-        const a = st.a + gal.phase + st.d * 5.1 + st.arm * TAU / 3;
-        const d = st.d * gr * 1.65;
-        const sx = Math.cos(a) * d, sy = Math.sin(a) * d;
-        ctx.globalAlpha = st.op * (0.62 + Math.sin(t * 0.013 + st.a * 5) * 0.25 + gal.pulse * 0.45);
-        ctx.fillStyle = `hsla(${gal.hue + st.hueShift},80%,82%,0.95)`;
-        ctx.beginPath(); ctx.arc(sx, sy, st.size, 0, TAU); ctx.fill();
-      }
-
-      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, gr * 0.54);
-      core.addColorStop(0, `hsla(${gal.hue + 35},78%,94%,${0.72 + gal.pulse * 0.2})`);
-      core.addColorStop(0.2, `hsla(${gal.hue + 12},88%,72%,0.48)`);
-      core.addColorStop(0.58, `hsla(${gal.hue},80%,48%,0.16)`);
-      core.addColorStop(1, `hsla(${gal.hue},70%,35%,0)`);
-      ctx.globalAlpha = 0.75;
-      ctx.fillStyle = core;
-      ctx.beginPath(); ctx.arc(0, 0, gr * 0.54, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      hit(gx, gy, gr * 1.4, "Галактика", () => {
-        gal.pulse = 1;
-        sparks(gx, gy, 14, gal.hue, 0.65);
-      });
-    }
-
-    /* ── компактное звёздное скопление ── */
-    {
-      const cx = W * 0.635, cy = H * 0.07;
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      for (const st of starCluster) {
-        st.phase += 0.011;
-        const rr = st.d * 36;
-        const x = cx + Math.cos(st.a + t * 0.00018) * rr;
-        const y = cy + Math.sin(st.a + t * 0.00018) * rr * 0.72;
-        ctx.globalAlpha = 0.18 + Math.abs(Math.sin(st.phase)) * 0.46;
-        ctx.fillStyle = `hsla(${st.hue},82%,86%,0.95)`;
-        ctx.beginPath(); ctx.arc(x, y, st.r, 0, TAU); ctx.fill();
-      }
-      const clusterGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 42);
-      clusterGlow.addColorStop(0, "rgba(205,220,255,0.09)");
-      clusterGlow.addColorStop(1, "rgba(140,160,255,0)");
-      ctx.globalAlpha = 0.55;
-      ctx.fillStyle = clusterGlow;
-      ctx.beginPath(); ctx.arc(cx, cy, 42, 0, TAU); ctx.fill();
-      ctx.restore();
-      hit(cx, cy, 34, "Звёздное скопление", () => {
-        for (const st of starCluster) st.phase += Math.PI * 0.6;
-        sparks(cx, cy, 18, 215, 0.65);
-      });
-    }
-
-    /* ── чёрная дыра: линзирование, фотонное кольцо и аккреционный диск ── */
-    {
-      blackHole.phase += 0.012 + blackHole.pulse * 0.04;
-      blackHole.pulse *= 0.97;
-      const x = blackHole.x * W, y = blackHole.y * H;
-      const r = Math.max(8, Math.min(12.5, W * 0.008));
-
-      // Вертикальные релятивистские джеты почти незаметны и видны только в темноте.
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      ctx.globalAlpha = 0.08 + blackHole.pulse * 0.1;
-      const jet = ctx.createLinearGradient(0, y - r * 8, 0, y + r * 8);
-      jet.addColorStop(0, "rgba(90,160,255,0)");
-      jet.addColorStop(0.42, "rgba(100,190,255,0.3)");
-      jet.addColorStop(0.5, "rgba(240,245,255,0.8)");
-      jet.addColorStop(0.58, "rgba(160,100,255,0.3)");
-      jet.addColorStop(1, "rgba(150,100,255,0)");
-      ctx.fillStyle = jet;
-      ctx.fillRect(x - 1.3, y - r * 8, 2.6, r * 16);
-      ctx.restore();
-
-      // Диск рисуется эллипсом; горячая сторона ярче холодной.
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(-0.16);
-      ctx.scale(1, 0.31);
-      ctx.globalCompositeOperation = "screen";
-      const disk = ctx.createRadialGradient(0, 0, r * 0.85, 0, 0, r * (4.2 + blackHole.pulse));
-      disk.addColorStop(0, "rgba(255,250,225,0)");
-      disk.addColorStop(0.16, `rgba(255,245,215,${0.68 + blackHole.pulse * 0.2})`);
-      disk.addColorStop(0.3, "rgba(255,145,65,0.42)");
-      disk.addColorStop(0.54, "rgba(190,75,225,0.2)");
-      disk.addColorStop(0.78, "rgba(80,145,255,0.07)");
-      disk.addColorStop(1, "rgba(80,125,255,0)");
-      ctx.fillStyle = disk;
-      ctx.beginPath(); ctx.arc(0, 0, r * (4.2 + blackHole.pulse), 0, TAU); ctx.fill();
-
-      // Тонкие неоднородности вещества вращаются внутри диска.
-      for (let k = 0; k < 7; k++) {
-        const a = blackHole.phase * (1 + k * 0.06) + k * 0.9;
-        const rr = r * (1.35 + k * 0.39);
-        ctx.globalAlpha = 0.16 + (k % 2) * 0.07;
-        ctx.strokeStyle = k < 3 ? "rgba(255,215,165,0.9)" : "rgba(125,155,255,0.7)";
-        ctx.lineWidth = 0.65;
-        ctx.beginPath(); ctx.arc(0, 0, rr, a, a + 1.65); ctx.stroke();
-      }
-      ctx.restore();
-
-      // Абсолютно тёмная тень и тонкое фотонное кольцо.
-      ctx.save();
-      const shadow = ctx.createRadialGradient(x - r * 0.15, y - r * 0.15, 0, x, y, r * 1.3);
-      shadow.addColorStop(0, "rgba(0,0,2,1)");
-      shadow.addColorStop(0.72, "rgba(0,0,4,1)");
-      shadow.addColorStop(0.82, "rgba(255,210,170,0.8)");
-      shadow.addColorStop(0.9, "rgba(90,160,255,0.16)");
-      shadow.addColorStop(1, "rgba(60,100,255,0)");
-      ctx.fillStyle = shadow;
-      ctx.beginPath(); ctx.arc(x, y, r * 1.3, 0, TAU); ctx.fill();
-      ctx.globalAlpha = 0.25 + blackHole.pulse * 0.25;
-      ctx.strokeStyle = "rgba(220,235,255,0.8)";
-      ctx.lineWidth = 0.7;
-      ctx.beginPath(); ctx.arc(x, y, r * 1.7, -1.15, 1.15); ctx.stroke();
-      ctx.restore();
-
-      hit(x, y, r * 3.6, "Чёрная дыра", () => {
-        blackHole.pulse = 1;
-        ring(x, y, 25, 90, 0.025);
-        for (const gal of galaxies) gal.pulse = Math.max(gal.pulse, 0.35);
-      });
-    }
-
-    /* ── звёзды разных спектральных классов ── */
+    /* Спокойный звёздный фон без туманностей, планет и соединительных линий. */
     for (const s of stars) {
       s.phase += s.speed;
+      const twinkle = 0.12 + Math.abs(Math.sin(s.phase)) * 0.48;
       ctx.save();
-      const twinkle = 0.14 + Math.abs(Math.sin(s.phase)) * 0.56;
       ctx.globalAlpha = twinkle;
-      const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
-      sg.addColorStop(0, `hsla(${s.hue},85%,80%,1)`);
-      sg.addColorStop(1, `hsla(${s.hue},85%,70%,0)`);
-      ctx.fillStyle = sg;
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 4, 0, TAU); ctx.fill();
-      ctx.fillStyle = `hsla(${s.hue},60%,95%,1)`;
+      const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3.2);
+      glow.addColorStop(0, `hsla(${s.hue},55%,90%,0.9)`);
+      glow.addColorStop(1, `hsla(${s.hue},55%,75%,0)`);
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3.2, 0, TAU); ctx.fill();
+      ctx.fillStyle = `hsla(${s.hue},35%,96%,0.95)`;
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
-
-      // Самые яркие звёзды получают оптические лучи, остальные остаются точками.
-      if (s.r > 1.52) {
-        const spike = s.r * (3.2 + Math.abs(Math.sin(s.phase * 0.7)) * 2.2);
-        ctx.globalAlpha = twinkle * 0.38;
-        const hg = ctx.createLinearGradient(s.x - spike, s.y, s.x + spike, s.y);
-        hg.addColorStop(0, `hsla(${s.hue},85%,85%,0)`);
-        hg.addColorStop(0.5, `hsla(${s.hue},85%,92%,0.9)`);
-        hg.addColorStop(1, `hsla(${s.hue},85%,85%,0)`);
-        ctx.strokeStyle = hg; ctx.lineWidth = 0.65;
-        ctx.beginPath(); ctx.moveTo(s.x - spike, s.y); ctx.lineTo(s.x + spike, s.y); ctx.stroke();
-        const vg = ctx.createLinearGradient(s.x, s.y - spike, s.x, s.y + spike);
-        vg.addColorStop(0, `hsla(${s.hue},85%,85%,0)`);
-        vg.addColorStop(0.5, `hsla(${s.hue},85%,92%,0.9)`);
-        vg.addColorStop(1, `hsla(${s.hue},85%,85%,0)`);
-        ctx.strokeStyle = vg;
-        ctx.beginPath(); ctx.moveTo(s.x, s.y - spike); ctx.lineTo(s.x, s.y + spike); ctx.stroke();
+      if (s.r > 1.35) {
+        const ray = s.r * 3.2;
+        ctx.globalAlpha = twinkle * 0.2;
+        ctx.strokeStyle = `hsla(${s.hue},45%,90%,0.7)`;
+        ctx.lineWidth = 0.55;
+        ctx.beginPath(); ctx.moveTo(s.x - ray, s.y); ctx.lineTo(s.x + ray, s.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x, s.y - ray); ctx.lineTo(s.x, s.y + ray); ctx.stroke();
       }
       ctx.restore();
-      hit(s.x, s.y, 14, "Звезда", () => {
-        meteor.active = true; meteor.x = s.x; meteor.y = s.y;
-        const sp = rand(6, 9); meteor.vx = -sp * 0.8; meteor.vy = sp * 0.45; meteor.life = 1;
-        sparks(s.x, s.y, 10, s.hue, 0.8);
-      });
     }
 
-    /* ── созвездия: тонкие линии проявляются как часть неба, без hover-обводки ── */
-    for (const cst of constellations) {
-      cst.pulse *= 0.97;
-      const breathe = 0.58 + Math.sin(t * 0.007 + cst.hue) * 0.18 + cst.pulse * 0.65;
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      ctx.globalAlpha = 0.11 + breathe * 0.12;
-      ctx.strokeStyle = `hsla(${cst.hue},85%,78%,0.9)`;
-      ctx.lineWidth = 0.75 + cst.pulse * 0.8;
-      ctx.beginPath();
-      for (const [a, b] of cst.links) {
-        const p1 = cst.points[a], p2 = cst.points[b];
-        ctx.moveTo(p1.x * W, p1.y * H);
-        ctx.lineTo(p2.x * W, p2.y * H);
-      }
-      ctx.stroke();
-
-      for (let i = 0; i < cst.points.length; i++) {
-        const p = cst.points[i];
-        const x = p.x * W, y = p.y * H;
-        const rr = 1.2 + (i % 3) * 0.35 + cst.pulse * 0.9;
-        ctx.globalAlpha = 0.38 + breathe * 0.36;
-        const cg = ctx.createRadialGradient(x, y, 0, x, y, rr * 4);
-        cg.addColorStop(0, `hsla(${cst.hue},90%,90%,1)`);
-        cg.addColorStop(1, `hsla(${cst.hue},90%,70%,0)`);
-        ctx.fillStyle = cg;
-        ctx.beginPath(); ctx.arc(x, y, rr * 4, 0, TAU); ctx.fill();
-        ctx.fillStyle = `hsla(${cst.hue},70%,94%,1)`;
-        ctx.beginPath(); ctx.arc(x, y, rr, 0, TAU); ctx.fill();
-      }
-      ctx.restore();
-
-      const cx = cst.points.reduce((sum, p) => sum + p.x, 0) / cst.points.length * W;
-      const cy = cst.points.reduce((sum, p) => sum + p.y, 0) / cst.points.length * H;
-      hit(cx, cy, 42, "Созвездие", () => {
-        cst.pulse = 1;
-        for (const p of cst.points) sparks(p.x * W, p.y * H, 3, cst.hue, 0.45);
-      });
-    }
-
-    /* ── детальная луна: корона, рельеф, кратеры и мягкий терминатор ── */
-    {
-      moon.phase += 0.0022;
-      moon.pulse *= 0.975;
-      const x = moon.x * W + Math.sin(moon.phase) * 2.5;
-      const y = moon.y * H + Math.cos(moon.phase * 0.7) * 1.5;
-      const r = Math.max(30, Math.min(49, W * 0.031));
-
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      const haloR = r * (2.7 + moon.pulse * 0.65);
-      const halo = ctx.createRadialGradient(x, y, r * 0.55, x, y, haloR);
-      halo.addColorStop(0, `rgba(210,225,255,${0.22 + moon.pulse * 0.2})`);
-      halo.addColorStop(0.32, `rgba(145,185,255,${0.09 + moon.pulse * 0.13})`);
-      halo.addColorStop(0.7, "rgba(125,120,255,0.025)");
-      halo.addColorStop(1, "rgba(100,120,255,0)");
-      ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(x, y, haloR, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      ctx.save();
-      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip();
-
-      // Сфера освещается сверху справа.
-      const surface = ctx.createRadialGradient(x + r * 0.34, y - r * 0.38, r * 0.05, x - r * 0.12, y + r * 0.08, r * 1.35);
-      surface.addColorStop(0, "rgba(255,252,235,0.98)");
-      surface.addColorStop(0.35, "rgba(220,230,245,0.98)");
-      surface.addColorStop(0.72, "rgba(145,165,205,0.96)");
-      surface.addColorStop(1, "rgba(55,65,105,0.95)");
-      ctx.fillStyle = surface;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-
-      // Моря и светлые высокогорья.
-      ctx.globalAlpha = 0.18;
-      ctx.fillStyle = "rgba(45,60,105,0.95)";
-      ctx.beginPath(); ctx.ellipse(x - r * 0.22, y - r * 0.14, r * 0.42, r * 0.23, -0.35, 0, TAU); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(x + r * 0.26, y + r * 0.28, r * 0.31, r * 0.18, 0.5, 0, TAU); ctx.fill();
-      ctx.fillStyle = "rgba(255,255,245,0.72)";
-      ctx.beginPath(); ctx.ellipse(x + r * 0.2, y - r * 0.35, r * 0.25, r * 0.12, -0.2, 0, TAU); ctx.fill();
-
-      // Кратеры с внутренней тенью и светлым валом.
-      for (const cr of moon.craters) {
-        const cx = x + cr.x * r, cy = y + cr.y * r, rr = cr.r * r;
-        ctx.globalAlpha = cr.op;
-        const crater = ctx.createRadialGradient(cx - rr * 0.3, cy - rr * 0.35, rr * 0.08, cx, cy, rr);
-        crater.addColorStop(0, "rgba(255,255,250,0.8)");
-        crater.addColorStop(0.46, "rgba(100,120,165,0.65)");
-        crater.addColorStop(0.75, "rgba(45,55,90,0.75)");
-        crater.addColorStop(1, "rgba(215,225,245,0.25)");
-        ctx.fillStyle = crater;
-        ctx.beginPath(); ctx.ellipse(cx, cy, rr, rr * 0.82, cr.x * 0.6, 0, TAU); ctx.fill();
-
-        if (cr.r > 0.085) {
-          ctx.globalAlpha = cr.op * 0.18;
-          ctx.strokeStyle = "rgba(245,248,255,0.8)";
-          ctx.lineWidth = 0.45;
-          for (let ray = 0; ray < 6; ray++) {
-            const a = ray * TAU / 6 + cr.x * 3;
-            ctx.beginPath();
-            ctx.moveTo(cx + Math.cos(a) * rr * 1.05, cy + Math.sin(a) * rr * 1.05);
-            ctx.lineTo(cx + Math.cos(a) * rr * 2.6, cy + Math.sin(a) * rr * 2.6);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Микрорельеф не даёт гладким участкам выглядеть цифровым градиентом.
-      for (const tx of moon.texture) {
-        if (tx.x * tx.x + tx.y * tx.y > 0.82) continue;
-        ctx.globalAlpha = tx.op;
-        ctx.fillStyle = tx.x > 0 ? "rgba(255,255,245,0.8)" : "rgba(35,45,80,0.9)";
-        ctx.beginPath();
-        ctx.arc(x + tx.x * r, y + tx.y * r, Math.max(0.35, tx.r * r), 0, TAU);
-        ctx.fill();
-      }
-
-      // Полупрозрачный терминатор добавляет объём, не превращая луну в плоский диск.
-      ctx.globalAlpha = 0.42;
-      const terminator = ctx.createLinearGradient(x - r, y, x + r * 0.8, y);
-      terminator.addColorStop(0, "rgba(6,8,28,0.82)");
-      terminator.addColorStop(0.42, "rgba(20,25,65,0.28)");
-      terminator.addColorStop(0.76, "rgba(20,25,65,0)");
-      ctx.fillStyle = terminator;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-      ctx.restore();
-
-      // Холодный кант по освещённой стороне.
-      ctx.save();
-      ctx.globalAlpha = 0.72 + moon.pulse * 0.25;
-      ctx.strokeStyle = "rgba(220,238,255,0.9)";
-      ctx.lineWidth = 1.15 + moon.pulse;
-      ctx.beginPath(); ctx.arc(x, y, r + 0.4, -1.34, 1.4); ctx.stroke();
-      ctx.restore();
-
-      hit(x, y, r * 1.25, "Луна", () => {
-        moon.pulse = 1;
-        auroraPulse = Math.max(auroraPulse, 0.35);
-        sparks(x + r * 0.7, y - r * 0.3, 18, 205, 0.8);
-      });
-    }
-
-    /* ── кольцевая планета с атмосферными полосами и маленьким спутником ── */
-    {
-      ringPlanet.phase += 0.004 + ringPlanet.pulse * 0.012;
-      ringPlanet.pulse *= 0.975;
-      const x = ringPlanet.x * W + Math.cos(ringPlanet.phase * 0.55) * 2;
-      const y = ringPlanet.y * H + Math.sin(ringPlanet.phase * 0.7) * 1.5;
-      const r = Math.max(16, Math.min(25, W * 0.016));
-      const ringW = r * 2.25;
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(ringPlanet.tilt);
-      ctx.globalCompositeOperation = "screen";
-      ctx.globalAlpha = 0.34 + ringPlanet.pulse * 0.24;
-      for (let k = 0; k < 3; k++) {
-        ctx.strokeStyle = k === 1 ? "rgba(210,185,255,0.8)" : "rgba(130,195,255,0.6)";
-        ctx.lineWidth = 1.1;
-        ctx.beginPath(); ctx.ellipse(0, 0, ringW + k * 3.2, r * 0.47 + k * 0.8, 0, Math.PI, TAU); ctx.stroke();
-      }
-      ctx.restore();
-
-      ctx.save();
-      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip();
-      const pg = ctx.createRadialGradient(x + r * 0.34, y - r * 0.4, 1, x, y, r * 1.25);
-      pg.addColorStop(0, "rgba(245,220,255,0.96)");
-      pg.addColorStop(0.3, "rgba(175,130,235,0.96)");
-      pg.addColorStop(0.72, "rgba(65,105,185,0.95)");
-      pg.addColorStop(1, "rgba(25,35,90,0.96)");
-      ctx.fillStyle = pg;
-      ctx.fillRect(x - r, y - r, r * 2, r * 2);
-      ctx.globalAlpha = 0.2;
-      for (let k = -3; k <= 3; k++) {
-        ctx.strokeStyle = k % 2 ? "rgba(255,210,240,0.8)" : "rgba(90,210,245,0.7)";
-        ctx.lineWidth = 1.3;
-        ctx.beginPath();
-        ctx.ellipse(x, y + k * r * 0.18 + Math.sin(ringPlanet.phase + k) * 0.6, r * 1.1, r * 0.13, 0, 0, TAU);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Передняя половина колец проходит поверх сферы.
-      ctx.save();
-      ctx.translate(x, y); ctx.rotate(ringPlanet.tilt);
-      ctx.globalAlpha = 0.5 + ringPlanet.pulse * 0.3;
-      ctx.strokeStyle = "rgba(205,220,255,0.85)";
-      ctx.lineWidth = 1.25;
-      ctx.beginPath(); ctx.ellipse(0, 0, ringW, r * 0.47, 0, 0, Math.PI); ctx.stroke();
-      ctx.restore();
-
-      const satelliteAngle = ringPlanet.phase * 1.5;
-      const sx = x + Math.cos(satelliteAngle) * r * 3.0;
-      const sy = y + Math.sin(satelliteAngle) * r * 0.85;
-      ctx.fillStyle = "rgba(185,230,255,0.82)";
-      ctx.beginPath(); ctx.arc(sx, sy, 1.6 + ringPlanet.pulse, 0, TAU); ctx.fill();
-
-      // Разреженный пояс астероидов движется по орбитам с разной скоростью.
-      for (const rock of asteroids) {
-        rock.a += rock.speed * (1 + ringPlanet.pulse * 5);
-        const ax = x + Math.cos(rock.a) * r * rock.orbit;
-        const ay = y + Math.sin(rock.a) * r * rock.orbit * rock.yScale;
-        const shade = 0.42 + Math.sin(rock.a) * 0.2;
-        ctx.save();
-        ctx.translate(ax, ay);
-        ctx.rotate(rock.a + rock.phase + t * rock.speed * 3);
-        ctx.globalAlpha = shade;
-        ctx.fillStyle = `hsla(${rock.hue},28%,${38 + shade * 26}%,0.95)`;
-        ctx.beginPath();
-        ctx.moveTo(-rock.size, -rock.size * 0.35);
-        ctx.lineTo(-rock.size * 0.2, -rock.size * 0.8);
-        ctx.lineTo(rock.size, -rock.size * 0.12);
-        ctx.lineTo(rock.size * 0.48, rock.size * 0.7);
-        ctx.lineTo(-rock.size * 0.72, rock.size * 0.52);
-        ctx.closePath(); ctx.fill();
-        ctx.restore();
-        hit(ax, ay, 9, "Астероид", () => {
-          rock.a += 0.35;
-          sparks(ax, ay, 6, rock.hue, 0.45);
-        });
-      }
-
-      hit(x, y, ringW * 1.05, "Планета", () => {
-        ringPlanet.pulse = 1;
-        sparks(x, y, 16, 275, 0.8);
-      });
-    }
-
-    /* ── далёкая комета: медленнее метеора, с широким газовым хвостом ── */
-    {
-      deepComet.phase += 0.01;
-      deepComet.pulse *= 0.97;
-      deepComet.x += deepComet.vx * (1 + deepComet.pulse * 2);
-      deepComet.y += deepComet.vy;
-      if (deepComet.x < -170 || deepComet.y > H * 0.48) {
-        deepComet.x = W + rand(100, 360);
-        deepComet.y = rand(H * 0.025, H * 0.16);
-      }
-      const x = deepComet.x, y = deepComet.y + Math.sin(deepComet.phase) * 2;
-      const len = 105 + deepComet.pulse * 55;
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      const tail = ctx.createLinearGradient(x, y, x + len, y - len * 0.13);
-      tail.addColorStop(0, `rgba(225,250,255,${0.56 + deepComet.pulse * 0.3})`);
-      tail.addColorStop(0.28, "rgba(105,220,255,0.22)");
-      tail.addColorStop(0.7, "rgba(150,125,255,0.07)");
-      tail.addColorStop(1, "rgba(150,125,255,0)");
-      ctx.strokeStyle = tail;
-      ctx.lineWidth = 2.5 + deepComet.pulse * 1.5;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.quadraticCurveTo(x + len * 0.5, y - len * 0.08 + Math.sin(t * 0.01) * 2, x + len, y - len * 0.13);
-      ctx.stroke();
-      const head = ctx.createRadialGradient(x, y, 0, x, y, 8 + deepComet.pulse * 5);
-      head.addColorStop(0, "rgba(255,255,245,1)");
-      head.addColorStop(0.35, "rgba(130,235,255,0.8)");
-      head.addColorStop(1, "rgba(125,160,255,0)");
-      ctx.fillStyle = head;
-      ctx.beginPath(); ctx.arc(x, y, 8 + deepComet.pulse * 5, 0, TAU); ctx.fill();
-      ctx.restore();
-      hit(x, y, 22, "Комета", () => {
-        deepComet.pulse = 1;
-        sparks(x, y, 18, 190, 1);
-      });
-    }
-
-    /* ── метеор ── */
-    if (!meteor.active && tick > meteor.next) {
-      meteor.active = true; meteor.x = rand(W * 0.2, W * 0.9); meteor.y = rand(20, H * 0.25);
-      const sp = rand(6, 9); meteor.vx = -sp * 0.8; meteor.vy = sp * 0.45; meteor.life = 1;
-    }
-    if (meteor.active) {
-      meteor.x += meteor.vx; meteor.y += meteor.vy; meteor.life -= 0.016;
-      if (meteor.life <= 0) { meteor.active = false; meteor.next = tick + rand(280, 620); }
-      else {
-        ctx.save();
-        ctx.globalAlpha = meteor.life;
-        const mg = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x - meteor.vx * 16, meteor.y - meteor.vy * 16);
-        mg.addColorStop(0, "rgba(255,245,210,1)");
-        mg.addColorStop(0.4, "rgba(130,220,255,0.6)");
-        mg.addColorStop(1, "rgba(150,120,255,0)");
-        ctx.strokeStyle = mg; ctx.lineWidth = 2.2; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(meteor.x, meteor.y);
-        ctx.lineTo(meteor.x - meteor.vx * 16, meteor.y - meteor.vy * 16); ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    /* ── облака (клик = дождик) ── */
-    for (const cl of clouds) {
-      cl.x += cl.vx;
-      if (cl.x - cl.r * 2 > W) { cl.x = -cl.r * 2.5; cl.y = rand(40, H * 0.3); }
-      ctx.save();
-      ctx.globalAlpha = cl.op;
-      ctx.fillStyle = `hsla(${cl.hue},70%,70%,1)`;
-      for (const p of cl.puffs) {
-        ctx.beginPath();
-        ctx.ellipse(cl.x + p.dx, cl.y + p.dy + Math.sin(t * 0.004 + p.dx) * 2, p.r, p.r * 0.45, 0, 0, TAU);
-        ctx.fill();
-      }
-      ctx.restore();
-      hit(cl.x, cl.y, cl.r * 0.9, "Облако", () => {
-        for (let i = 0; i < 16; i++)
-          addPart({ x: cl.x + rand(-cl.r, cl.r), y: cl.y + rand(0, 14), kind: "drop",
-            vx: rand(-0.3, 0.3), vy: rand(2.4, 4.4), hue: 195, size: rand(1.1, 2), decay: 0.004, grav: 0.07 });
-      });
-    }
+    // Искусственные аппараты движутся медленно и не перекрывают основной контент.
+    for (const satellite of satellites) drawSatellite(satellite, t);
+    for (const rocket of rockets) drawRocket(rocket, t);
 
     drawEdge("l"); drawEdge("r");
     drawRidge(ridgeFar, true, t);
@@ -1443,7 +945,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     for (const b of birds) {
       b.x += b.vx; b.phase += 0.05;
       b.y += Math.sin(b.phase * 0.2) * 0.2;
-      if (b.x > W + 120) { b.x = -100; b.y = rand(40, 240); }
+      if (b.x > W + 120) { b.x = -100; b.y = rand(H * 0.52, H * 0.67); }
       const flap = Math.sin(b.phase) * 5;
       ctx.save(); ctx.translate(b.x, b.y); ctx.globalAlpha = b.op;
       ctx.strokeStyle = `hsla(${b.hue},70%,80%,0.95)`;
@@ -1676,7 +1178,6 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
         wv.howl = 1; wv.pause = 180;
         for (let i = 0; i < 3; i++) ring(wv.x + s * 0.55 * wv.dir, gy - s * 0.95, 200 + i * 20, 90 + i * 55, 0.016);
         notes(wv.x + s * 0.5 * wv.dir, gy - s * 1.1, 200, 4);
-        auroraPulse = Math.max(auroraPulse, 0.5);
       });
     }
 
@@ -2029,7 +1530,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       bf.scare *= 0.95;
       bf.phase += 0.016 * (1 + bf.scare * 3);
       bf.ax += bf.vx * (1 + bf.scare * 5);
-      if (bf.ax > W + 60) { bf.ax = -60; bf.ay = rand(H * 0.25, H * 0.8); }
+      if (bf.ax > W + 60) { bf.ax = -60; bf.ay = rand(H * 0.56, H * 0.82); }
       const bx = bf.ax + Math.sin(bf.phase * 2.2) * 40;
       const by = bf.ay + Math.cos(bf.phase * 1.7) * 30 + Math.sin(bf.phase * 5) * 6;
       const flap = Math.abs(Math.sin(bf.phase * (9 + bf.scare * 20)));
@@ -2055,7 +1556,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       const d = dragonfly;
       d.zip *= 0.95;
       const dx = d.tx - d.x, dy = d.ty - d.y, dist = Math.hypot(dx, dy);
-      if (dist < 12) { d.tx = rand(W * 0.15, W * 0.85); d.ty = rand(H * 0.35, H * 0.75); }
+      if (dist < 12) { d.tx = rand(W * 0.15, W * 0.85); d.ty = rand(H * 0.56, H * 0.78); }
       else {
         d.x += (dx / dist) * (3.2 + d.zip * 8);
         d.y += (dy / dist) * (3.2 + d.zip * 8) + Math.sin(t * 0.08) * 0.6;
@@ -2077,7 +1578,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.beginPath(); ctx.ellipse(-1, 3, 6, 1.8 * wa + 0.5, 0.3, 0, TAU); ctx.fill();
       ctx.restore();
       hit(d.x, d.y, 18, "Стрекоза", () => {
-        d.zip = 1; d.tx = rand(W * 0.1, W * 0.9); d.ty = rand(H * 0.3, H * 0.8);
+        d.zip = 1; d.tx = rand(W * 0.1, W * 0.9); d.ty = rand(H * 0.56, H * 0.82);
         sparks(d.x, d.y, 9, 170, 0.8);
       });
     }
@@ -2111,7 +1612,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     /* ── листья ── */
     for (const l of leaves) {
       l.x += l.vx; l.y += l.vy; l.rot += l.rs;
-      if (l.y > H + 15) { l.y = -15; l.x = Math.random() * W; }
+      if (l.y > H + 15) { l.y = H * 0.52; l.x = Math.random() * W; }
       ctx.save();
       ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.globalAlpha = l.op;
       ctx.beginPath();
@@ -2132,7 +1633,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       sd.phase += 0.01;
       sd.y -= sd.vy;
       sd.x += Math.sin(sd.phase * 3) * 0.3;
-      if (sd.y < -12) { sd.y = H + 12; sd.x = Math.random() * W; }
+      if (sd.y < H * 0.5) { sd.y = H + 12; sd.x = Math.random() * W; }
       ctx.save();
       ctx.translate(sd.x, sd.y); ctx.rotate(sd.phase); ctx.globalAlpha = sd.op;
       ctx.strokeStyle = "rgba(225,245,255,0.95)"; ctx.lineWidth = 0.9;
