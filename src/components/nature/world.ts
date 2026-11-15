@@ -41,6 +41,10 @@ interface Star   { x: number; y: number; r: number; phase: number; speed: number
 interface SpaceDust { x: number; y: number; r: number; hue: number; op: number; phase: number; speed: number }
 interface Nebula { x: number; y: number; rx: number; ry: number; hueA: number; hueB: number; phase: number; drift: number; op: number; angle: number }
 interface Constellation { points: { x: number; y: number }[]; links: [number, number][]; hue: number; pulse: number }
+interface Galaxy {
+  x: number; y: number; r: number; tilt: number; hue: number; phase: number; speed: number; pulse: number;
+  stars: { a: number; d: number; arm: number; size: number; op: number; hueShift: number }[];
+}
 interface Mist   { y: number; w: number; x: number; vx: number; op: number; hue: number }
 interface Orb    { x: number; y: number; r: number; vx: number; vy: number; hue: number; op: number; phase: number }
 interface Mush   { x: number; scale: number; hue: number; pop: number }
@@ -213,28 +217,28 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   const seeds: Seed[] = Array.from({ length: 14 }, () => ({
     x: rand(0, W), y: rand(0, H), vy: rand(0.06, 0.2), phase: rand(0, TAU), op: rand(0.25, 0.5),
   }));
-  const stars: Star[] = Array.from({ length: 76 }, () => ({
+  const stars: Star[] = Array.from({ length: 94 }, () => ({
     x: rand(0, W), y: rand(0, H * 0.5), r: rand(0.7, 1.9), phase: rand(0, TAU),
     speed: rand(0.01, 0.035), hue: pick([195, 45, 280, 0, 160]),
   }));
 
   // Мелкая космическая пыль хранится в относительных координатах и не ломается при resize.
-  const spaceDust: SpaceDust[] = Array.from({ length: 115 }, () => ({
+  const spaceDust: SpaceDust[] = Array.from({ length: 148 }, () => ({
     x: rand(0, 1),
     y: rand(0.015, 0.49),
     r: rand(0.25, 1.15),
     hue: pick([185, 205, 225, 265, 305, 42]),
-    op: rand(0.12, 0.5),
+    op: rand(0.08, 0.38),
     phase: rand(0, TAU),
     speed: rand(0.003, 0.018),
   }));
 
   // Туманности образуют глубину: холодный дальний слой и тёплые цветовые ядра.
   const nebulae: Nebula[] = [
-    { x: 0.13, y: 0.14, rx: 0.28, ry: 0.16, hueA: 205, hueB: 275, phase: 0.4, drift: 0.0018, op: 0.17, angle: -0.25 },
-    { x: 0.56, y: 0.09, rx: 0.34, ry: 0.14, hueA: 285, hueB: 328, phase: 2.3, drift: 0.0013, op: 0.13, angle: 0.18 },
-    { x: 0.88, y: 0.3,  rx: 0.23, ry: 0.17, hueA: 165, hueB: 205, phase: 4.4, drift: 0.0016, op: 0.15, angle: -0.42 },
-    { x: 0.4,  y: 0.34, rx: 0.2,  ry: 0.11, hueA: 25,  hueB: 325, phase: 1.2, drift: 0.0011, op: 0.08, angle: 0.34 },
+    { x: 0.13, y: 0.14, rx: 0.28, ry: 0.16, hueA: 205, hueB: 275, phase: 0.4, drift: 0.0018, op: 0.105, angle: -0.25 },
+    { x: 0.56, y: 0.09, rx: 0.34, ry: 0.14, hueA: 285, hueB: 328, phase: 2.3, drift: 0.0013, op: 0.085, angle: 0.18 },
+    { x: 0.88, y: 0.3,  rx: 0.23, ry: 0.17, hueA: 165, hueB: 205, phase: 4.4, drift: 0.0016, op: 0.095, angle: -0.42 },
+    { x: 0.4,  y: 0.34, rx: 0.2,  ry: 0.11, hueA: 25,  hueB: 325, phase: 1.2, drift: 0.0011, op: 0.05, angle: 0.34 },
   ];
 
   // Пыль Млечного Пути лежит вдоль диагонали и медленно дрейфует.
@@ -259,11 +263,42 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     },
   ];
 
+  const makeGalaxy = (x: number, y: number, r: number, tilt: number, hue: number, phase: number): Galaxy => ({
+    x, y, r, tilt, hue, phase, speed: rand(0.0007, 0.0016), pulse: 0,
+    stars: Array.from({ length: 62 }, (_, i) => {
+      const d = Math.pow(Math.random(), 0.72);
+      return {
+        a: rand(0, TAU), d,
+        arm: i % 3,
+        size: rand(0.28, 1.05) * (1.2 - d * 0.35),
+        op: rand(0.18, 0.68) * (1.1 - d * 0.25),
+        hueShift: rand(-28, 32),
+      };
+    }),
+  });
+  const galaxies: Galaxy[] = [
+    makeGalaxy(0.355, 0.095, 30, -0.28, 205, 0.2),
+    makeGalaxy(0.705, 0.265, 23, 0.38, 285, 2.1),
+    makeGalaxy(0.945, 0.075, 17, -0.46, 32, 4.2),
+  ];
+
+  const starCluster = Array.from({ length: 44 }, () => {
+    const a = rand(0, TAU), d = Math.pow(Math.random(), 1.7);
+    return { a, d, r: rand(0.35, 1.2), hue: pick([190, 205, 225, 270, 42]), phase: rand(0, TAU) };
+  });
+
+  const blackHole = { x: 0.515, y: 0.13, phase: 0, pulse: 0 };
+
   const moon = {
     x: 0.84, y: 0.145, phase: 0, pulse: 0,
-    craters: Array.from({ length: 13 }, () => ({ x: rand(-0.58, 0.5), y: rand(-0.55, 0.55), r: rand(0.045, 0.13), op: rand(0.09, 0.22) })),
+    craters: Array.from({ length: 24 }, () => ({ x: rand(-0.64, 0.57), y: rand(-0.62, 0.62), r: rand(0.025, 0.12), op: rand(0.07, 0.22) })),
+    texture: Array.from({ length: 38 }, () => ({ x: rand(-0.86, 0.86), y: rand(-0.86, 0.86), r: rand(0.006, 0.025), op: rand(0.04, 0.14) })),
   };
   const ringPlanet = { x: 0.18, y: 0.275, phase: 0, pulse: 0, tilt: -0.24 };
+  const asteroids = Array.from({ length: 24 }, () => ({
+    a: rand(0, TAU), orbit: rand(2.7, 4.3), speed: rand(0.0008, 0.0022) * (Math.random() > 0.5 ? 1 : -1),
+    size: rand(0.6, 2.2), yScale: rand(0.24, 0.42), hue: rand(195, 255), phase: rand(0, TAU),
+  }));
   const deepComet = { x: W * 1.12, y: H * 0.08, vx: -0.55, vy: 0.075, phase: 0, pulse: 0 };
   const meteor = { active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, next: 300 };
   const clouds: Cloud[] = Array.from({ length: 5 }, (_, i) => {
@@ -547,9 +582,9 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     /* ── глубокий космический фон ── */
     {
       const sky = ctx.createLinearGradient(0, 0, 0, H * 0.58);
-      sky.addColorStop(0, "rgba(3,5,25,0.48)");
-      sky.addColorStop(0.42, "rgba(10,8,38,0.32)");
-      sky.addColorStop(0.78, "rgba(7,25,42,0.16)");
+      sky.addColorStop(0, "rgba(0,1,11,0.82)");
+      sky.addColorStop(0.42, "rgba(3,4,23,0.68)");
+      sky.addColorStop(0.78, "rgba(4,17,31,0.34)");
       sky.addColorStop(1, "rgba(4,16,24,0)");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H * 0.58);
@@ -557,7 +592,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       // Очень слабая синяя засветка горизонта связывает небо с горами.
       const horizon = ctx.createLinearGradient(0, H * 0.28, 0, H * 0.62);
       horizon.addColorStop(0, "rgba(35,70,125,0)");
-      horizon.addColorStop(0.62, "rgba(35,90,120,0.09)");
+      horizon.addColorStop(0.62, "rgba(25,65,95,0.06)");
       horizon.addColorStop(1, "rgba(20,65,75,0)");
       ctx.fillStyle = horizon;
       ctx.fillRect(0, H * 0.25, W, H * 0.4);
@@ -605,8 +640,8 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       const band = ctx.createLinearGradient(0, -H * 0.16, 0, H * 0.16);
       band.addColorStop(0, "rgba(120,150,235,0)");
       band.addColorStop(0.28, "rgba(120,155,235,0.025)");
-      band.addColorStop(0.48, "rgba(225,215,255,0.085)");
-      band.addColorStop(0.52, "rgba(180,205,255,0.075)");
+      band.addColorStop(0.48, "rgba(225,215,255,0.052)");
+      band.addColorStop(0.52, "rgba(180,205,255,0.046)");
       band.addColorStop(0.74, "rgba(130,135,230,0.025)");
       band.addColorStop(1, "rgba(100,120,220,0)");
       ctx.fillStyle = band;
@@ -623,6 +658,24 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
         ctx.globalAlpha = d.op * (0.72 + Math.sin(t * 0.012 + d.x * 31) * 0.28);
         ctx.fillStyle = `hsla(${d.hue},80%,82%,0.95)`;
         ctx.beginPath(); ctx.arc(x, y, d.r, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+
+      // Неровные тёмные прожилки поглощающей пыли внутри Млечного Пути.
+      ctx.save();
+      ctx.translate(W * 0.5, H * 0.2);
+      ctx.rotate(0.29);
+      ctx.lineCap = "round";
+      for (let lane = 0; lane < 3; lane++) {
+        const off = (lane - 1) * 17;
+        ctx.globalAlpha = 0.11 - lane * 0.016;
+        ctx.strokeStyle = "rgba(0,1,12,0.95)";
+        ctx.lineWidth = 7 + lane * 5;
+        ctx.beginPath();
+        ctx.moveTo(-W * 0.72, off - 7);
+        ctx.bezierCurveTo(-W * 0.25, off + 18 + Math.sin(t * 0.001 + lane) * 4,
+          W * 0.18, off - 17, W * 0.72, off + 8);
+        ctx.stroke();
       }
       ctx.restore();
     }
@@ -642,7 +695,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     auroraPulse *= 0.985;
     ctx.save();
     for (let band = 0; band < 3; band++) {
-      ctx.globalAlpha = (0.14 - band * 0.03) + Math.sin(t * 0.004 + band) * 0.05 + auroraPulse * 0.25;
+      ctx.globalAlpha = (0.078 - band * 0.016) + Math.sin(t * 0.004 + band) * 0.026 + auroraPulse * 0.18;
       ctx.beginPath();
       const yTop = H * (0.02 + band * 0.05);
       for (let x = 0; x <= W; x += 36) {
@@ -680,11 +733,164 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.restore();
     }
 
-    /* ── звёзды ── */
+    /* ── далёкие галактики: ядро, три спиральных рукава и звёздная россыпь ── */
+    for (const gal of galaxies) {
+      gal.phase += gal.speed * (1 + gal.pulse * 7);
+      gal.pulse *= 0.975;
+      const gx = gal.x * W, gy = gal.y * H;
+      const gr = gal.r * (1 + gal.pulse * 0.16);
+
+      ctx.save();
+      ctx.translate(gx, gy);
+      ctx.rotate(gal.tilt);
+      ctx.scale(1, 0.48);
+      ctx.globalCompositeOperation = "screen";
+
+      // Едва заметные рукава дают структуру даже в очень тёмном небе.
+      for (let arm = 0; arm < 3; arm++) {
+        ctx.globalAlpha = 0.09 + gal.pulse * 0.12;
+        ctx.strokeStyle = `hsla(${gal.hue + arm * 14},78%,68%,0.85)`;
+        ctx.lineWidth = 2.8 - arm * 0.45;
+        ctx.beginPath();
+        for (let k = 0; k <= 34; k++) {
+          const d = k / 34;
+          const a = gal.phase + arm * TAU / 3 + d * 5.25;
+          const rr = gr * 1.62 * d;
+          const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+          k === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      for (const st of gal.stars) {
+        const a = st.a + gal.phase + st.d * 5.1 + st.arm * TAU / 3;
+        const d = st.d * gr * 1.65;
+        const sx = Math.cos(a) * d, sy = Math.sin(a) * d;
+        ctx.globalAlpha = st.op * (0.62 + Math.sin(t * 0.013 + st.a * 5) * 0.25 + gal.pulse * 0.45);
+        ctx.fillStyle = `hsla(${gal.hue + st.hueShift},80%,82%,0.95)`;
+        ctx.beginPath(); ctx.arc(sx, sy, st.size, 0, TAU); ctx.fill();
+      }
+
+      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, gr * 0.54);
+      core.addColorStop(0, `hsla(${gal.hue + 35},78%,94%,${0.72 + gal.pulse * 0.2})`);
+      core.addColorStop(0.2, `hsla(${gal.hue + 12},88%,72%,0.48)`);
+      core.addColorStop(0.58, `hsla(${gal.hue},80%,48%,0.16)`);
+      core.addColorStop(1, `hsla(${gal.hue},70%,35%,0)`);
+      ctx.globalAlpha = 0.75;
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(0, 0, gr * 0.54, 0, TAU); ctx.fill();
+      ctx.restore();
+
+      hit(gx, gy, gr * 1.4, "Галактика", () => {
+        gal.pulse = 1;
+        sparks(gx, gy, 14, gal.hue, 0.65);
+      });
+    }
+
+    /* ── компактное звёздное скопление ── */
+    {
+      const cx = W * 0.635, cy = H * 0.07;
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      for (const st of starCluster) {
+        st.phase += 0.011;
+        const rr = st.d * 36;
+        const x = cx + Math.cos(st.a + t * 0.00018) * rr;
+        const y = cy + Math.sin(st.a + t * 0.00018) * rr * 0.72;
+        ctx.globalAlpha = 0.18 + Math.abs(Math.sin(st.phase)) * 0.46;
+        ctx.fillStyle = `hsla(${st.hue},82%,86%,0.95)`;
+        ctx.beginPath(); ctx.arc(x, y, st.r, 0, TAU); ctx.fill();
+      }
+      const clusterGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 42);
+      clusterGlow.addColorStop(0, "rgba(205,220,255,0.09)");
+      clusterGlow.addColorStop(1, "rgba(140,160,255,0)");
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = clusterGlow;
+      ctx.beginPath(); ctx.arc(cx, cy, 42, 0, TAU); ctx.fill();
+      ctx.restore();
+      hit(cx, cy, 34, "Звёздное скопление", () => {
+        for (const st of starCluster) st.phase += Math.PI * 0.6;
+        sparks(cx, cy, 18, 215, 0.65);
+      });
+    }
+
+    /* ── чёрная дыра: линзирование, фотонное кольцо и аккреционный диск ── */
+    {
+      blackHole.phase += 0.012 + blackHole.pulse * 0.04;
+      blackHole.pulse *= 0.97;
+      const x = blackHole.x * W, y = blackHole.y * H;
+      const r = Math.max(8, Math.min(12.5, W * 0.008));
+
+      // Вертикальные релятивистские джеты почти незаметны и видны только в темноте.
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      ctx.globalAlpha = 0.08 + blackHole.pulse * 0.1;
+      const jet = ctx.createLinearGradient(0, y - r * 8, 0, y + r * 8);
+      jet.addColorStop(0, "rgba(90,160,255,0)");
+      jet.addColorStop(0.42, "rgba(100,190,255,0.3)");
+      jet.addColorStop(0.5, "rgba(240,245,255,0.8)");
+      jet.addColorStop(0.58, "rgba(160,100,255,0.3)");
+      jet.addColorStop(1, "rgba(150,100,255,0)");
+      ctx.fillStyle = jet;
+      ctx.fillRect(x - 1.3, y - r * 8, 2.6, r * 16);
+      ctx.restore();
+
+      // Диск рисуется эллипсом; горячая сторона ярче холодной.
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-0.16);
+      ctx.scale(1, 0.31);
+      ctx.globalCompositeOperation = "screen";
+      const disk = ctx.createRadialGradient(0, 0, r * 0.85, 0, 0, r * (4.2 + blackHole.pulse));
+      disk.addColorStop(0, "rgba(255,250,225,0)");
+      disk.addColorStop(0.16, `rgba(255,245,215,${0.68 + blackHole.pulse * 0.2})`);
+      disk.addColorStop(0.3, "rgba(255,145,65,0.42)");
+      disk.addColorStop(0.54, "rgba(190,75,225,0.2)");
+      disk.addColorStop(0.78, "rgba(80,145,255,0.07)");
+      disk.addColorStop(1, "rgba(80,125,255,0)");
+      ctx.fillStyle = disk;
+      ctx.beginPath(); ctx.arc(0, 0, r * (4.2 + blackHole.pulse), 0, TAU); ctx.fill();
+
+      // Тонкие неоднородности вещества вращаются внутри диска.
+      for (let k = 0; k < 7; k++) {
+        const a = blackHole.phase * (1 + k * 0.06) + k * 0.9;
+        const rr = r * (1.35 + k * 0.39);
+        ctx.globalAlpha = 0.16 + (k % 2) * 0.07;
+        ctx.strokeStyle = k < 3 ? "rgba(255,215,165,0.9)" : "rgba(125,155,255,0.7)";
+        ctx.lineWidth = 0.65;
+        ctx.beginPath(); ctx.arc(0, 0, rr, a, a + 1.65); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Абсолютно тёмная тень и тонкое фотонное кольцо.
+      ctx.save();
+      const shadow = ctx.createRadialGradient(x - r * 0.15, y - r * 0.15, 0, x, y, r * 1.3);
+      shadow.addColorStop(0, "rgba(0,0,2,1)");
+      shadow.addColorStop(0.72, "rgba(0,0,4,1)");
+      shadow.addColorStop(0.82, "rgba(255,210,170,0.8)");
+      shadow.addColorStop(0.9, "rgba(90,160,255,0.16)");
+      shadow.addColorStop(1, "rgba(60,100,255,0)");
+      ctx.fillStyle = shadow;
+      ctx.beginPath(); ctx.arc(x, y, r * 1.3, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 0.25 + blackHole.pulse * 0.25;
+      ctx.strokeStyle = "rgba(220,235,255,0.8)";
+      ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.arc(x, y, r * 1.7, -1.15, 1.15); ctx.stroke();
+      ctx.restore();
+
+      hit(x, y, r * 3.6, "Чёрная дыра", () => {
+        blackHole.pulse = 1;
+        ring(x, y, 25, 90, 0.025);
+        for (const gal of galaxies) gal.pulse = Math.max(gal.pulse, 0.35);
+      });
+    }
+
+    /* ── звёзды разных спектральных классов ── */
     for (const s of stars) {
       s.phase += s.speed;
       ctx.save();
-      ctx.globalAlpha = 0.25 + Math.abs(Math.sin(s.phase)) * 0.65;
+      const twinkle = 0.14 + Math.abs(Math.sin(s.phase)) * 0.56;
+      ctx.globalAlpha = twinkle;
       const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
       sg.addColorStop(0, `hsla(${s.hue},85%,80%,1)`);
       sg.addColorStop(1, `hsla(${s.hue},85%,70%,0)`);
@@ -692,6 +898,24 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 4, 0, TAU); ctx.fill();
       ctx.fillStyle = `hsla(${s.hue},60%,95%,1)`;
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+
+      // Самые яркие звёзды получают оптические лучи, остальные остаются точками.
+      if (s.r > 1.52) {
+        const spike = s.r * (3.2 + Math.abs(Math.sin(s.phase * 0.7)) * 2.2);
+        ctx.globalAlpha = twinkle * 0.38;
+        const hg = ctx.createLinearGradient(s.x - spike, s.y, s.x + spike, s.y);
+        hg.addColorStop(0, `hsla(${s.hue},85%,85%,0)`);
+        hg.addColorStop(0.5, `hsla(${s.hue},85%,92%,0.9)`);
+        hg.addColorStop(1, `hsla(${s.hue},85%,85%,0)`);
+        ctx.strokeStyle = hg; ctx.lineWidth = 0.65;
+        ctx.beginPath(); ctx.moveTo(s.x - spike, s.y); ctx.lineTo(s.x + spike, s.y); ctx.stroke();
+        const vg = ctx.createLinearGradient(s.x, s.y - spike, s.x, s.y + spike);
+        vg.addColorStop(0, `hsla(${s.hue},85%,85%,0)`);
+        vg.addColorStop(0.5, `hsla(${s.hue},85%,92%,0.9)`);
+        vg.addColorStop(1, `hsla(${s.hue},85%,85%,0)`);
+        ctx.strokeStyle = vg;
+        ctx.beginPath(); ctx.moveTo(s.x, s.y - spike); ctx.lineTo(s.x, s.y + spike); ctx.stroke();
+      }
       ctx.restore();
       hit(s.x, s.y, 14, "Звезда", () => {
         meteor.active = true; meteor.x = s.x; meteor.y = s.y;
@@ -791,6 +1015,29 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
         crater.addColorStop(1, "rgba(215,225,245,0.25)");
         ctx.fillStyle = crater;
         ctx.beginPath(); ctx.ellipse(cx, cy, rr, rr * 0.82, cr.x * 0.6, 0, TAU); ctx.fill();
+
+        if (cr.r > 0.085) {
+          ctx.globalAlpha = cr.op * 0.18;
+          ctx.strokeStyle = "rgba(245,248,255,0.8)";
+          ctx.lineWidth = 0.45;
+          for (let ray = 0; ray < 6; ray++) {
+            const a = ray * TAU / 6 + cr.x * 3;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * rr * 1.05, cy + Math.sin(a) * rr * 1.05);
+            ctx.lineTo(cx + Math.cos(a) * rr * 2.6, cy + Math.sin(a) * rr * 2.6);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Микрорельеф не даёт гладким участкам выглядеть цифровым градиентом.
+      for (const tx of moon.texture) {
+        if (tx.x * tx.x + tx.y * tx.y > 0.82) continue;
+        ctx.globalAlpha = tx.op;
+        ctx.fillStyle = tx.x > 0 ? "rgba(255,255,245,0.8)" : "rgba(35,45,80,0.9)";
+        ctx.beginPath();
+        ctx.arc(x + tx.x * r, y + tx.y * r, Math.max(0.35, tx.r * r), 0, TAU);
+        ctx.fill();
       }
 
       // Полупрозрачный терминатор добавляет объём, не превращая луну в плоский диск.
@@ -872,6 +1119,31 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       const sy = y + Math.sin(satelliteAngle) * r * 0.85;
       ctx.fillStyle = "rgba(185,230,255,0.82)";
       ctx.beginPath(); ctx.arc(sx, sy, 1.6 + ringPlanet.pulse, 0, TAU); ctx.fill();
+
+      // Разреженный пояс астероидов движется по орбитам с разной скоростью.
+      for (const rock of asteroids) {
+        rock.a += rock.speed * (1 + ringPlanet.pulse * 5);
+        const ax = x + Math.cos(rock.a) * r * rock.orbit;
+        const ay = y + Math.sin(rock.a) * r * rock.orbit * rock.yScale;
+        const shade = 0.42 + Math.sin(rock.a) * 0.2;
+        ctx.save();
+        ctx.translate(ax, ay);
+        ctx.rotate(rock.a + rock.phase + t * rock.speed * 3);
+        ctx.globalAlpha = shade;
+        ctx.fillStyle = `hsla(${rock.hue},28%,${38 + shade * 26}%,0.95)`;
+        ctx.beginPath();
+        ctx.moveTo(-rock.size, -rock.size * 0.35);
+        ctx.lineTo(-rock.size * 0.2, -rock.size * 0.8);
+        ctx.lineTo(rock.size, -rock.size * 0.12);
+        ctx.lineTo(rock.size * 0.48, rock.size * 0.7);
+        ctx.lineTo(-rock.size * 0.72, rock.size * 0.52);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+        hit(ax, ay, 9, "Астероид", () => {
+          rock.a += 0.35;
+          sparks(ax, ay, 6, rock.hue, 0.45);
+        });
+      }
 
       hit(x, y, ringW * 1.05, "Планета", () => {
         ringPlanet.pulse = 1;
