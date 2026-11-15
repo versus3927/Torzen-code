@@ -354,91 +354,21 @@ body {
   animation-fill-mode: both;
 }
 
-/* ── Glow blobs (radial gradients — no GPU blur, just color) ── */
-.mn-glow {
-  position: absolute;
-  border-radius: 50%;
-  animation: mn-glow-pulse 6s ease-in-out infinite;
-}
-.mn-glow-l1 {
-  left: -18%; top:  48%;
-  width: 60vw; height: 60vw;
-  background: radial-gradient(circle, rgba(30,100,20,0.14) 0%, transparent 70%);
-  animation-delay: 0s;
-}
-.mn-glow-l2 {
-  left: -12%; top: 65%;
-  width: 50vw; height: 50vw;
-  background: radial-gradient(circle, rgba(20,80,15,0.1) 0%, transparent 70%);
-  animation-delay: 2.5s;
-}
-.mn-glow-r1 {
-  right: -18%; top: 50%;
-  width: 55vw; height: 55vw;
-  background: radial-gradient(circle, rgba(25,90,18,0.12) 0%, transparent 70%);
-  animation-delay: 1.2s;
-}
-.mn-glow-r2 {
-  right: -15%; top: 67%;
-  width: 48vw; height: 48vw;
-  background: radial-gradient(circle, rgba(18,70,12,0.09) 0%, transparent 70%);
-  animation-delay: 3.5s;
-}
-.mn-glow-b {
-  left: 50%; bottom: -10%; transform: translateX(-50%);
-  width: 90vw; height: 40vw;
-  background: radial-gradient(ellipse, rgba(22,80,16,0.12) 0%, transparent 70%);
-  animation-delay: 0.8s;
-}
+/* ── Glow blobs — hidden to keep hero clean ── */
+.mn-glow { display: none; }
 
-/* ── Trees ── */
-.mn-tree {
-  position: absolute;
-  bottom: 0;
-  transform-origin: bottom center;
-  animation: mn-sway 8s ease-in-out infinite;
-}
-.mn-tree-ll { left: -1vw;  width: 15vw; height: auto; opacity: 0.65; animation-delay: 0s; }
-.mn-tree-lr { left:  9vw;  width: 11vw; height: auto; opacity: 0.45; animation-delay: 1.8s; animation-duration: 11s; }
-.mn-tree-rl { right:-1vw;  width: 15vw; height: auto; opacity: 0.65; animation-delay: 0.9s; transform-origin: bottom center; }
-.mn-tree-rr { right: 9vw;  width: 11vw; height: auto; opacity: 0.45; animation-delay: 2.6s; animation-duration: 10s; }
+/* ── Trees — hidden, they stick out over content ── */
+.mn-tree { display: none; }
 
 /* ── Static mountain, stream and animals ── */
-.mn-mountains {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 11%;
-  width: 100%;
-  height: 22vh;
-  opacity: .55;
-}
-.mn-stream {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 8vh;
-  background:
-    linear-gradient(176deg, transparent 0 18%, rgba(105,225,235,.36) 19%, transparent 21%),
-    linear-gradient(180deg, rgba(42,165,190,.14), rgba(45,85,175,.28));
-}
-.mn-animal {
-  position: absolute;
-  bottom: 5.5%;
-  height: auto;
-  opacity: .74;
-}
-.mn-deer { left: 21%; width: 48px; }
-.mn-fox { right: 22%; width: 44px; }
+.mn-mountains,
+.mn-stream,
+.mn-animal,
+.mn-deer,
+.mn-fox { display: none; }
 
-/* ── Grass ── */
-.mn-grass {
-  position: absolute;
-  bottom: 0;
-}
-.mn-grass-l { left: 0;   width: 32vw; height: auto; opacity: 0.55; }
-.mn-grass-r { right: 0;  width: 32vw; height: auto; opacity: 0.55; }
+/* ── Grass — hidden ── */
+.mn-grass { display: none; }
 
 /* ── Birds ── */
 .mn-bird {
@@ -484,64 +414,24 @@ body {
   will-change: opacity, transform;
 }
 
-/* ── Ground fog (pure CSS gradient, no blur) ── */
-.mn-fog {
-  position: absolute;
-  bottom: 0;
-  height: 22vw;
-  border-radius: 50%;
-  animation: mn-fog-drift 12s ease-in-out infinite;
-}
-.mn-fog-1 {
-  left: -10%; width: 70vw;
-  background: radial-gradient(ellipse at bottom, rgba(20,70,15,0.18) 0%, transparent 70%);
-  animation-delay: 0s;
-}
-.mn-fog-2 {
-  right: -10%; width: 70vw;
-  background: radial-gradient(ellipse at bottom, rgba(18,65,13,0.14) 0%, transparent 70%);
-  animation-delay: 4s;
-}
+/* ── Ground fog — hidden ── */
+.mn-fog { display: none; }
 
 /* ── Override the global animation killer for nature elements ── */
 @media (max-width: 767px) {
-  .mn-tree    { animation-duration: unset !important; }
   .mn-bird    { animation-duration: unset !important; }
   .mn-leaf    { animation-duration: unset !important; }
   .mn-star    { animation-duration: unset !important; }
-  .mn-fog     { animation-duration: unset !important; }
-  .mn-glow    { animation-duration: unset !important; }
-  .mn-tree-ll { animation-duration: 8s !important; }
-  .mn-tree-lr { animation-duration: 11s !important; }
-  .mn-tree-rl { animation-duration: 9s !important; }
-  .mn-tree-rr { animation-duration: 10s !important; }
   .mn-leaf-1  { animation-duration: 14s !important; }
   .mn-leaf-2  { animation-duration: 18s !important; }
   .mn-leaf-3  { animation-duration: 22s !important; }
-  .mn-leaf-4  { animation-duration: 16s !important; }
-  .mn-leaf-5  { animation-duration: 20s !important; }
   .mn-bird-1  { animation-duration: 22s !important; }
   .mn-bird-2  { animation-duration: 28s !important; }
-  .mn-bird-3  { animation-duration: 34s !important; }
-  .mn-fog-1   { animation-duration: 12s !important; }
-  .mn-fog-2   { animation-duration: 12s !important; }
-  .mn-glow-l1, .mn-glow-l2, .mn-glow-r1, .mn-glow-r2, .mn-glow-b { animation-duration: 6s !important; }
-
-  /* Компенсируем две новые анимации: старые декоративные слои делаем статичными. */
-  .mn-glow,
-  .mn-fog,
-  .mn-star,
-  .mn-tree-lr,
-  .mn-tree-rr { animation: none !important; will-change: auto; }
-  .mn-bird-3,
-  .mn-leaf-4,
-  .mn-leaf-5 { display: none; }
   .mn-satellite { animation-duration: 42s !important; }
   .mn-rocket { animation-duration: 31s !important; }
 }
 
 @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
-  .mn-tree,
   .mn-bird,
   .mn-leaf,
   .mn-satellite,
