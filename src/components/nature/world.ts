@@ -4,8 +4,6 @@
  */
 
 export interface WorldOptions {
-  /** вызывается при смене объекта под курсором */
-  onHover?: (label: string | null) => void;
   /** вызывается при первом успешном клике по объекту */
   onInteract?: () => void;
 }
@@ -269,17 +267,10 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   /* ═══════════ interaction state ═══════════ */
 
   let hits: Hit[] = [];
-  let mx = -9999, my = -9999;
-  let suppressed = false;
-  let hoverIdx = -1;
-  let hoverLabel: string | null = null;
   let interacted = false;
 
   const isUi = (t: EventTarget | null) =>
     t instanceof Element && !!t.closest("a,button,input,textarea,select,label,[role='button'],[contenteditable]");
-
-  const onMove = (e: PointerEvent) => { mx = e.clientX; my = e.clientY; suppressed = isUi(e.target); };
-  const onLeave = () => { mx = -9999; my = -9999; };
 
   const findHit = (x: number, y: number) => {
     let best = -1, bestD = Infinity;
@@ -311,9 +302,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     sparks(e.clientX, e.clientY, 8, rand(40, 300), 0.7);
   };
 
-  window.addEventListener("pointermove", onMove, { passive: true });
   window.addEventListener("pointerdown", onDown, true);
-  window.addEventListener("pointerleave", onLeave);
 
   const hit = (x: number, y: number, r: number, label: string, act: () => void) => hits.push({ x, y, r, label, act });
 
@@ -1579,35 +1568,6 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.restore();
     }
 
-    /* ── подсветка объекта под курсором ── */
-    if (!suppressed && mx > -1000) {
-      const idx = findHit(mx, my);
-      if (idx !== hoverIdx) hoverIdx = idx;
-      const label = idx >= 0 ? hits[idx].label : (my > waterY ? "Ручей" : null);
-      if (label !== hoverLabel) { hoverLabel = label; opts.onHover?.(label); }
-      if (idx >= 0) {
-        const h = hits[idx];
-        const pulse = 1 + Math.sin(t * 0.12) * 0.06;
-        ctx.save();
-        ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = "rgba(255,255,255,0.85)";
-        ctx.lineWidth = 1.4;
-        ctx.setLineDash([5, 6]);
-        ctx.lineDashOffset = -t * 0.35;
-        ctx.beginPath(); ctx.arc(h.x, h.y, h.r * 0.92 * pulse, 0, TAU); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 0.14;
-        const g = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, h.r);
-        g.addColorStop(0, "rgba(255,255,255,0.7)");
-        g.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(h.x, h.y, h.r, 0, TAU); ctx.fill();
-        ctx.restore();
-      }
-    } else if (hoverLabel !== null) {
-      hoverLabel = null; hoverIdx = -1; opts.onHover?.(null);
-    }
-
     raf = requestAnimationFrame(loop);
   };
 
@@ -1617,9 +1577,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     destroy() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown, true);
-      window.removeEventListener("pointerleave", onLeave);
     },
   };
 }
