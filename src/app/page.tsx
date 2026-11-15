@@ -95,14 +95,14 @@ function MobilePage() {
 
   const renderSection = (id: string) => {
     switch (id) {
-      case "hero":      return <HeroSection />;
+      case "hero":      return <HeroSection onCasesClick={() => goTo(5, 1)} />;
       case "about":     return <AboutSection />;
       case "services":  return <ServicesSection />;
       case "stats":     return <StatsSection />;
       case "process":   return <ProcessSection />;
       case "portfolio": return <PortfolioSection />;
       case "faq":       return <FAQSection />;
-      case "cta":       return <CTASection />;
+      case "cta":       return <CTASection onStackClick={() => goTo(2, 1)} />;
       case "contact":   return <ContactSection />;
       default:          return null;
     }

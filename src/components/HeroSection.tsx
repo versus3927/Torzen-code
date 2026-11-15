@@ -9,7 +9,7 @@ const heroImage =
   "https://images.pexels.com/photos/16214065/pexels-photo-16214065.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=1400&w=2200";
 
 /* ── Desktop hero with parallax ── */
-function DesktopHero() {
+function DesktopHero({ onCasesClick }: { onCasesClick?: () => void } = {}) {
   const ref = useRef<HTMLElement | null>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
@@ -38,7 +38,7 @@ function DesktopHero() {
       <motion.div style={{ y: contentY, opacity: heroOpacity }} className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-end px-6 pb-16 pt-28 md:items-center md:pb-24">
         <div className="grid w-full gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
           <div className="max-w-2xl">
-            <HeroContent />
+            <HeroContent onCasesClick={onCasesClick} />
           </div>
           <motion.div
             initial={{ opacity: 0, x: 44, filter: "blur(10px)" }}
@@ -63,7 +63,7 @@ function DesktopHero() {
 }
 
 /* ── Mobile hero: ZERO JS animations, zero blur, static bg ── */
-function MobileHero() {
+function MobileHero({ onCasesClick }: { onCasesClick?: () => void } = {}) {
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden">
       {/* Static background — no scale, no motion, no blur */}
@@ -72,7 +72,7 @@ function MobileHero() {
 
       <div className="relative z-10 flex min-h-screen items-end px-5 pb-10 pt-24">
         <div className="w-full">
-          <HeroContent />
+          <HeroContent onCasesClick={onCasesClick} />
         </div>
       </div>
     </section>
@@ -80,7 +80,7 @@ function MobileHero() {
 }
 
 /* ── Shared content (no motion wrappers) ── */
-function HeroContent() {
+function HeroContent({ onCasesClick }: { onCasesClick?: () => void } = {}) {
   return (
     <>
       <span className="inline-flex h-7 items-center rounded-full border border-white/14 px-3 text-[10px] uppercase tracking-[0.34em] text-white/55">
@@ -118,6 +118,7 @@ function HeroContent() {
           </svg>
         </a>
         <a href="#portfolio"
+          onClick={onCasesClick ? (e) => { e.preventDefault(); onCasesClick(); } : undefined}
           className="outline-btn-static inline-flex items-center gap-2 rounded-sm px-7 py-3.5 text-sm font-medium tracking-[0.08em] no-underline sm:px-8 sm:py-4">
           Смотреть кейсы
         </a>
@@ -148,7 +149,7 @@ function StatsPanel() {
   );
 }
 
-export default function HeroSection() {
+export default function HeroSection({ onCasesClick }: { onCasesClick?: () => void } = {}) {
   const isMobile = useIsMobile();
-  return isMobile ? <MobileHero /> : <DesktopHero />;
+  return isMobile ? <MobileHero onCasesClick={onCasesClick} /> : <DesktopHero onCasesClick={onCasesClick} />;
 }

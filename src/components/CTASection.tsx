@@ -5,7 +5,12 @@ import AnimatedSection from "./AnimatedSection";
 
 const TG = "https://t.me/versusire";
 
-export default function CTASection() {
+interface CTASectionProps {
+  /** Мобильная версия: переключение на вкладку «Услуги» (anchor #services там не существует) */
+  onStackClick?: () => void;
+}
+
+export default function CTASection({ onStackClick }: CTASectionProps = {}) {
   return (
     <section id="cta" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -59,6 +64,7 @@ export default function CTASection() {
 
                   <motion.a
                     href="#services"
+                    onClick={onStackClick ? (e) => { e.preventDefault(); onStackClick(); } : undefined}
                     whileHover={{ scale: 1.04, y: -2 }}
                     whileTap={{ scale: 0.96 }}
                     className="outline-btn inline-flex w-full items-center justify-center gap-2 rounded-sm px-6 py-4 text-center text-sm font-medium tracking-[0.08em] no-underline sm:w-auto sm:px-8"
