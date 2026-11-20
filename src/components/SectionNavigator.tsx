@@ -72,20 +72,6 @@ export default function SectionNavigator() {
             </span>
           </motion.div>
 
-          {/* Вверх */}
-          <motion.button
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            onClick={() => goTo(-1)}
-            disabled={isFirst}
-            aria-label="Предыдущая секция"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-black/55 text-white/55 backdrop-blur-md transition hover:border-white/35 hover:bg-white/8 hover:text-white disabled:opacity-20"
-          >
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="2 9 7 4 12 9"/>
-            </svg>
-          </motion.button>
-
           {/* Точки */}
           <div className="flex flex-col items-center gap-[5px] py-1">
             {SECTIONS.map((id, i) => (
@@ -104,19 +90,7 @@ export default function SectionNavigator() {
             ))}
           </div>
 
-          {/* Вниз */}
-          <motion.button
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            onClick={() => goTo(1)}
-            disabled={isLast}
-            aria-label="Следующая секция"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-black/55 text-white/55 backdrop-blur-md transition hover:border-white/35 hover:bg-white/8 hover:text-white disabled:opacity-20"
-          >
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="2 5 7 10 12 5"/>
-            </svg>
-          </motion.button>
+
         </motion.div>
       )}
     </AnimatePresence>
