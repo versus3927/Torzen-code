@@ -23,7 +23,7 @@ import useIsMobile from "@/hooks/useIsMobile";
 const ParticleBackground = dynamic(() => import("@/components/ParticleBackground"), { ssr: false });
 const CursorGlow = dynamic(() => import("@/components/CursorGlow"), { ssr: false });
 const NatureOverlay = dynamic(() => import("@/components/NatureOverlay"), { ssr: false });
-const SectionNavigator = dynamic(() => import("@/components/SectionNavigator"), { ssr: false });
+
 
 const MOBILE_SECTIONS = [
   { id: "hero",      label: "Главная"      },
@@ -45,7 +45,6 @@ function DesktopPage() {
         <NatureOverlay />
         <CursorGlow />
         <Navbar />
-        <SectionNavigator />
 
         <div className="relative z-10">
           <HeroSection />
