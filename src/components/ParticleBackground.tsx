@@ -25,16 +25,16 @@ export default function ParticleBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Меньше частиц, нет линий между ними
-    const COUNT = 70;
+    // Еще меньше частиц и меньше движения
+    const COUNT = 35;
     const HUES = [160, 190, 275, 45, 330, 120];
     const particles = Array.from({ length: COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.08,
-      vy: Math.random() * 0.12 + 0.02,
-      size: Math.random() * 1.8 + 0.5,
-      opacity: Math.random() * 0.4 + 0.18,
+      vx: (Math.random() - 0.5) * 0.04,
+      vy: Math.random() * 0.06 + 0.01,
+      size: Math.random() * 1.5 + 0.4,
+      opacity: Math.random() * 0.2 + 0.1,
       hue: HUES[Math.floor(Math.random() * HUES.length)],
       phase: Math.random() * 6.28,
     }));
@@ -50,22 +50,22 @@ export default function ParticleBackground() {
         if (p.x < -5) p.x = canvas.width + 5;
         if (p.x > canvas.width + 5) p.x = -5;
 
-        p.phase += 0.02;
-        const tw = 0.6 + Math.sin(p.phase) * 0.4;
+        p.phase += 0.01;
+        const tw = 0.7 + Math.sin(p.phase) * 0.3;
 
-        // цветное гало
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 6);
-        g.addColorStop(0, `hsla(${p.hue},95%,72%,${p.opacity * tw * 0.8})`);
-        g.addColorStop(1, `hsla(${p.hue},95%,65%,0)`);
+        // цветное гало (более приглушенное)
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
+        g.addColorStop(0, `hsla(${p.hue},90%,60%,${p.opacity * tw * 0.4})`);
+        g.addColorStop(1, `hsla(${p.hue},90%,50%,0)`);
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 6, 0, 6.28);
+        ctx.arc(p.x, p.y, p.size * 5, 0, 6.28);
         ctx.fill();
 
         // ядро
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, 6.28);
-        ctx.fillStyle = `hsla(${p.hue},90%,88%,${p.opacity * tw})`;
+        ctx.fillStyle = `hsla(${p.hue},80%,85%,${p.opacity * tw})`;
         ctx.fill();
       }
 

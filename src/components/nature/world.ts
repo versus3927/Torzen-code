@@ -121,129 +121,117 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
 
   /* ═══════════ entities ═══════════ */
 
-  // Деревья (интерактивные)
+  // Деревья (количество уменьшено для спокойствия)
   const treeHues = [120, 140, 95, 160, 35, 20];
-  const trees: Tree[] = Array.from({ length: 11 }, (_, i) => ({
-    x: (i + 0.5) / 11 + rand(-0.035, 0.035),
-    h: rand(75, 165),
+  const trees: Tree[] = Array.from({ length: 6 }, (_, i) => ({
+    x: (i + 0.5) / 6 + rand(-0.035, 0.035),
+    h: rand(75, 155),
     kind: pick([0, 1, 2]) as 0 | 1 | 2,
     hue: pick(treeHues),
     phase: rand(0, TAU),
     shake: 0,
-    w: rand(0.85, 1.25),
+    w: rand(0.8, 1.1),
   }));
 
-  // Дальняя линия леса (фон)
-  const farTrees = Array.from({ length: 46 }, () => ({ x: Math.random(), h: rand(16, 44), w: rand(8, 18) }));
+  // Дальняя линия леса
+  const farTrees = Array.from({ length: 22 }, () => ({ x: Math.random(), h: rand(12, 36), w: rand(6, 14) }));
 
   // Кусты
-  const bushes = Array.from({ length: 9 }, () => ({ x: Math.random(), r: rand(14, 30), hue: rand(100, 155), phase: rand(0, TAU) }));
+  const bushes = Array.from({ length: 4 }, () => ({ x: Math.random(), r: rand(12, 24), hue: rand(100, 145), phase: rand(0, TAU) }));
 
-  // Грибы (интерактивные)
-  const mushrooms: Mush[] = Array.from({ length: 7 }, () => ({
-    x: Math.random(), scale: rand(0.7, 1.4), hue: pick([0, 10, 25, 320, 45]), pop: 0,
+  // Грибы
+  const mushrooms: Mush[] = Array.from({ length: 3 }, () => ({
+    x: Math.random(), scale: rand(0.7, 1.2), hue: pick([0, 10, 25, 320, 45]), pop: 0,
   }));
 
-  // Камни (интерактивные)
-  const rocks: Rock[] = Array.from({ length: 8 }, (_, i) => {
-    const inWater = i > 4;
-    return { x: Math.random(), y: inWater ? rand(0.935, 0.98) : 0, w: rand(10, 26), h: rand(7, 16),
-      hue: rand(195, 260), shake: 0, inWater };
+  // Камни
+  const rocks: Rock[] = Array.from({ length: 4 }, (_, i) => {
+    const inWater = i > 2;
+    return { x: Math.random(), y: inWater ? rand(0.935, 0.98) : 0, w: rand(8, 20), h: rand(6, 12),
+      hue: rand(195, 240), shake: 0, inWater };
   });
 
   // Камыш и кувшинки
-  const reeds: Reed[] = Array.from({ length: 22 }, () => ({ x: Math.random(), h: rand(18, 42), phase: rand(0, TAU) }));
-  const pads: Pad[] = Array.from({ length: 5 }, () => ({ x: Math.random(), r: rand(10, 18), phase: rand(0, TAU) }));
+  const reeds: Reed[] = Array.from({ length: 10 }, () => ({ x: Math.random(), h: rand(15, 35), phase: rand(0, TAU) }));
+  const pads: Pad[] = Array.from({ length: 3 }, () => ({ x: Math.random(), r: rand(8, 15), phase: rand(0, TAU) }));
 
-  // Листья
+  // Листья (замедлены)
   const leafHues = [18, 30, 42, 52, 8, 95, 130];
-  const leaves: Leaf[] = Array.from({ length: 30 }, () => ({
-    x: rand(0, W), y: rand(H * 0.52, H), vx: rand(-0.18, 0.18), vy: rand(0.12, 0.4),
-    rot: rand(0, TAU), rs: rand(-0.009, 0.009), size: rand(4, 10), op: rand(0.4, 0.75),
-    hue: pick(leafHues), sat: rand(70, 95), light: rand(45, 62),
+  const leaves: Leaf[] = Array.from({ length: 12 }, () => ({
+    x: rand(0, W), y: rand(H * 0.52, H), vx: rand(-0.08, 0.08), vy: rand(0.06, 0.2),
+    rot: rand(0, TAU), rs: rand(-0.004, 0.004), size: rand(3, 7), op: rand(0.3, 0.5),
+    hue: pick(leafHues), sat: rand(60, 85), light: rand(35, 52),
   }));
 
-  // Птицы
-  const birds: Bird[] = Array.from({ length: 7 }, (_, i) => ({
-    x: -100 - i * rand(160, 400), y: rand(H * 0.52, H * 0.67), vx: rand(0.35, 0.65),
-    phase: rand(0, TAU), size: rand(9, 14), op: rand(0.4, 0.65), hue: rand(190, 230),
+  // Птицы (замедлены)
+  const birds: Bird[] = Array.from({ length: 3 }, (_, i) => ({
+    x: -100 - i * rand(200, 500), y: rand(H * 0.52, H * 0.67), vx: rand(0.18, 0.32),
+    phase: rand(0, TAU), size: rand(8, 12), op: rand(0.3, 0.45), hue: rand(190, 230),
   }));
 
-  // Орёл
-  const eagle = { cx: W * 0.7, cy: H * 0.58, r: 72, ang: rand(0, TAU), speed: 0.0042, size: 1.5, drift: rand(0.04, 0.07), boost: 0 };
+  // Орёл (замедлен)
+  const eagle = { cx: W * 0.7, cy: H * 0.58, r: 72, ang: rand(0, TAU), speed: 0.0021, size: 1.3, drift: rand(0.02, 0.035), boost: 0 };
 
-  // Олени
+  // Олени (замедлены)
   const deer: Deer[] = [
-    { x: W * 0.15, vx: 0.15, dir: 1,  legPhase: 0,   size: 1,   op: 0.55, alert: 0, boost: 0 },
-    { x: W * 0.75, vx: 0.12, dir: -1, legPhase: 1.5, size: 0.7, op: 0.45, alert: 0, boost: 0 },
-    { x: W * 0.45, vx: 0.1,  dir: 1,  legPhase: 3.1, size: 0.5, op: 0.38, alert: 0, boost: 0 },
+    { x: W * 0.15, vx: 0.07, dir: 1,  legPhase: 0,   size: 1,   op: 0.35, alert: 0, boost: 0 },
+    { x: W * 0.75, vx: 0.05, dir: -1, legPhase: 1.5, size: 0.7, op: 0.25, alert: 0, boost: 0 },
   ];
 
-  // Заяц / лиса / ёжик / волк
-  const bunny = { x: W * 0.3, dir: 1 as 1 | -1, hop: 0, pause: 120, size: 0.9, big: 0 };
-  const fox   = { x: -80, dir: 1 as 1 | -1, phase: 0, size: 0.95, dash: 0 };
+  // Заяц / лиса / ёжик / волк (количество уменьшено)
+  const bunny = { x: W * 0.3, dir: 1 as 1 | -1, hop: 0, pause: 240, size: 0.8, big: 0 };
+  const fox   = { x: -80, dir: 1 as 1 | -1, phase: 0, size: 0.9, dash: 0 };
   const hog   = { x: W * 0.6, dir: -1 as 1 | -1, phase: 0, curl: 0 };
-  const wolf  = { x: W * 0.08, dir: 1 as 1 | -1, phase: 0, howl: 0, walk: 0, pause: 200 };
 
-  // Сова и белка — живут на деревьях
-  const owl = { tree: 2, fly: 0, from: 0, to: 0, blink: 0, hoot: 0, turn: 0 };
-  const squirrel = { tree: 5, climb: 0.3, dir: 1 as 1 | -1, speed: 0.004, dash: 0 };
+  // Сова и белка
+  const owl = { tree: 1, fly: 0, from: 0, to: 0, blink: 0, hoot: 0, turn: 0 };
+  const squirrel = { tree: 3, climb: 0.3, dir: 1 as 1 | -1, speed: 0.002, dash: 0 };
 
   // Лягушка на кувшинке + утка
   const frog = { pad: 0, jump: 0, from: 0, to: 0, croak: 0 };
-  const duck = { x: W * 0.4, vx: 0.22, dir: 1 as 1 | -1, bob: 0, flap: 0 };
+  const duck = { x: W * 0.4, vx: 0.11, dir: 1 as 1 | -1, bob: 0, flap: 0 };
 
   // Пчела
   const bee = { x: W * 0.5, y: H * 0.8, tx: W * 0.5, ty: H * 0.8, phase: 0, buzz: 0 };
 
-  // Бабочки / стрекоза / светлячки
-  const flutters: Flutter[] = Array.from({ length: 5 }, (_, i) => ({
+  // Бабочки / стрекоза / светлячки (количество уменьшено)
+  const flutters: Flutter[] = Array.from({ length: 2 }, (_, i) => ({
     ax: rand(100, W - 100), ay: rand(H * 0.56, H * 0.82), phase: i * 1.7,
-    vx: rand(0.2, 0.5), hue: [15, 40, 200, 280, 330][i % 5], size: rand(0.9, 1.5), scare: 0,
+    vx: rand(0.1, 0.25), hue: [15, 200][i % 2], size: rand(0.8, 1.2), scare: 0,
   }));
   const dragonfly = { x: W * 0.5, y: H * 0.6, tx: W * 0.5, ty: H * 0.6, wing: 0, zip: 0 };
-  const fireflies: Firefly[] = Array.from({ length: 18 }, () => ({
+  const fireflies: Firefly[] = Array.from({ length: 8 }, () => ({
     x: rand(0, W), y: rand(H * 0.54, H), ax: rand(0, W), ay: rand(H * 0.56, H * 0.95),
-    phase: rand(0, TAU), speed: rand(0.2, 0.5), r: rand(1.4, 2.8),
+    phase: rand(0, TAU), speed: rand(0.1, 0.25), r: rand(1.2, 2.2),
     hue: Math.random() > 0.3 ? rand(45, 62) : rand(160, 185), flash: 0,
   }));
 
-  // Сферы света, семена и многослойный глубокий космос.
-  const seeds: Seed[] = Array.from({ length: 14 }, () => ({
-    x: rand(0, W), y: rand(H * 0.52, H), vy: rand(0.06, 0.2), phase: rand(0, TAU), op: rand(0.25, 0.5),
+  // Семена и многослойный глубокий космос (затемнение и уменьшение объектов)
+  const seeds: Seed[] = Array.from({ length: 6 }, () => ({
+    x: rand(0, W), y: rand(H * 0.52, H), vy: rand(0.03, 0.1), phase: rand(0, TAU), op: rand(0.15, 0.3),
   }));
-  const stars: Star[] = Array.from({ length: 94 }, () => ({
-    x: rand(0, W), y: rand(0, H * 0.5), r: rand(0.7, 1.9), phase: rand(0, TAU),
-    speed: rand(0.01, 0.035), hue: pick([195, 45, 280, 0, 160]),
+  const stars: Star[] = Array.from({ length: 45 }, () => ({
+    x: rand(0, W), y: rand(0, H * 0.5), r: rand(0.5, 1.4), phase: rand(0, TAU),
+    speed: rand(0.005, 0.015), hue: pick([195, 45, 280, 0, 160]),
   }));
 
-  const spaceDust: SpaceDust[] = Array.from({ length: 148 }, () => ({
-    x: rand(0, 1), y: rand(0.015, 0.49), r: rand(0.25, 1.15),
-    hue: pick([185, 205, 225, 265, 305, 42]), op: rand(0.08, 0.38), phase: rand(0, TAU), speed: rand(0.003, 0.018),
+  const spaceDust: SpaceDust[] = Array.from({ length: 60 }, () => ({
+    x: rand(0, 1), y: rand(0.015, 0.49), r: rand(0.2, 0.9),
+    hue: pick([185, 205, 225]), op: rand(0.04, 0.18), phase: rand(0, TAU), speed: rand(0.001, 0.008),
   }));
 
   const nebulae: Nebula[] = [
-    { x: 0.13, y: 0.14, rx: 0.28, ry: 0.16, hueA: 205, hueB: 275, phase: 0.4, drift: 0.0018, op: 0.105, angle: -0.25 },
-    { x: 0.56, y: 0.09, rx: 0.34, ry: 0.14, hueA: 285, hueB: 328, phase: 2.3, drift: 0.0013, op: 0.085, angle: 0.18 },
-    { x: 0.88, y: 0.3,  rx: 0.23, ry: 0.17, hueA: 165, hueB: 205, phase: 4.4, drift: 0.0016, op: 0.095, angle: -0.42 },
-    { x: 0.4,  y: 0.34, rx: 0.2,  ry: 0.11, hueA: 25,  hueB: 325, phase: 1.2, drift: 0.0011, op: 0.05, angle: 0.34 },
+    { x: 0.13, y: 0.14, rx: 0.28, ry: 0.16, hueA: 205, hueB: 275, phase: 0.4, drift: 0.0009, op: 0.04, angle: -0.25 },
+    { x: 0.56, y: 0.09, rx: 0.34, ry: 0.14, hueA: 285, hueB: 328, phase: 2.3, drift: 0.0006, op: 0.03, angle: 0.18 },
   ];
 
-  const galaxyDust = Array.from({ length: 145 }, () => {
+  const galaxyDust = Array.from({ length: 50 }, () => {
     const x = rand(-0.12, 1.12);
     const spread = (Math.random() + Math.random() - 1) * 0.105;
-    return { x, y: 0.055 + x * 0.31 + spread, r: rand(0.3, 1.45), op: rand(0.1, 0.55), hue: pick([195, 220, 265, 315, 40]) };
+    return { x, y: 0.055 + x * 0.31 + spread, r: rand(0.2, 0.9), op: rand(0.05, 0.25), hue: pick([195, 220, 265]) };
   });
 
   const constellations: Constellation[] = [
-    {
-      points: [{ x: .08, y: .1 }, { x: .125, y: .135 }, { x: .17, y: .12 }, { x: .205, y: .17 }, { x: .245, y: .145 }, { x: .28, y: .19 }],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [1, 3]], hue: 195, pulse: 0,
-    },
-    {
-      points: [{ x: .58, y: .18 }, { x: .62, y: .135 }, { x: .665, y: .16 }, { x: .69, y: .215 }, { x: .735, y: .235 }, { x: .71, y: .28 }],
-      links: [[0, 1], [1, 2], [2, 3], [3, 4], [3, 5]], hue: 275, pulse: 0,
-    },
     {
       points: [{ x: .34, y: .29 }, { x: .375, y: .25 }, { x: .415, y: .28 }, { x: .45, y: .245 }, { x: .49, y: .275 }],
       links: [[0, 1], [1, 2], [2, 3], [3, 4]], hue: 43, pulse: 0,
@@ -251,93 +239,88 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   ];
 
   const makeGalaxy = (x: number, y: number, r: number, tilt: number, hue: number, phase: number): Galaxy => ({
-    x, y, r, tilt, hue, phase, speed: rand(0.0007, 0.0016), pulse: 0,
-    stars: Array.from({ length: 62 }, (_, i) => {
+    x, y, r, tilt, hue, phase, speed: rand(0.0003, 0.0008), pulse: 0,
+    stars: Array.from({ length: 30 }, (_, i) => {
       const d = Math.pow(Math.random(), 0.72);
       return {
-        a: rand(0, TAU), d, arm: i % 3,
-        size: rand(0.28, 1.05) * (1.2 - d * 0.35),
-        op: rand(0.18, 0.68) * (1.1 - d * 0.25),
-        hueShift: rand(-28, 32),
+        a: rand(0, TAU), d, arm: i % 2,
+        size: rand(0.2, 0.7) * (1.1 - d * 0.3),
+        op: rand(0.1, 0.4) * (1.0 - d * 0.2),
+        hueShift: rand(-20, 20),
       };
     }),
   });
   const galaxies: Galaxy[] = [
-    makeGalaxy(0.355, 0.095, 30, -0.28, 205, 0.2),
-    makeGalaxy(0.705, 0.265, 23, 0.38, 285, 2.1),
-    makeGalaxy(0.945, 0.075, 17, -0.46, 32, 4.2),
+    makeGalaxy(0.355, 0.095, 22, -0.28, 205, 0.2),
   ];
 
-  const starCluster = Array.from({ length: 44 }, () => {
+  const starCluster = Array.from({ length: 22 }, () => {
     const a = rand(0, TAU), d = Math.pow(Math.random(), 1.7);
-    return { a, d, r: rand(0.35, 1.2), hue: pick([190, 205, 225, 270, 42]), phase: rand(0, TAU) };
+    return { a, d, r: rand(0.25, 0.8), hue: pick([190, 205, 225]), phase: rand(0, TAU) };
   });
 
   const blackHole = { x: 0.515, y: 0.13, phase: 0, pulse: 0 };
   const moon = {
     x: 0.84, y: 0.145, phase: 0, pulse: 0,
-    craters: Array.from({ length: 24 }, () => ({ x: rand(-0.64, 0.57), y: rand(-0.62, 0.62), r: rand(0.025, 0.12), op: rand(0.07, 0.22) })),
-    texture: Array.from({ length: 38 }, () => ({ x: rand(-0.86, 0.86), y: rand(-0.86, 0.86), r: rand(0.006, 0.025), op: rand(0.04, 0.14) })),
+    craters: Array.from({ length: 12 }, () => ({ x: rand(-0.64, 0.57), y: rand(-0.62, 0.62), r: rand(0.02, 0.08), op: rand(0.05, 0.15) })),
+    texture: Array.from({ length: 20 }, () => ({ x: rand(-0.86, 0.86), y: rand(-0.86, 0.86), r: rand(0.005, 0.015), op: rand(0.03, 0.08) })),
   };
   const ringPlanet = { x: 0.18, y: 0.275, phase: 0, pulse: 0, tilt: -0.24 };
-  const asteroids = Array.from({ length: 24 }, () => ({
-    a: rand(0, TAU), orbit: rand(2.7, 4.3), speed: rand(0.0008, 0.0022) * (Math.random() > 0.5 ? 1 : -1),
-    size: rand(0.6, 2.2), yScale: rand(0.24, 0.42), hue: rand(195, 255), phase: rand(0, TAU),
+  const asteroids = Array.from({ length: 8 }, () => ({
+    a: rand(0, TAU), orbit: rand(2.7, 4.3), speed: rand(0.0004, 0.0011) * (Math.random() > 0.5 ? 1 : -1),
+    size: rand(0.5, 1.5), yScale: rand(0.24, 0.42), hue: rand(195, 255), phase: rand(0, TAU),
   }));
-  const deepComet = { x: W * 1.12, y: H * 0.08, vx: -0.55, vy: 0.075, phase: 0, pulse: 0 };
-  const meteor = { active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, next: 300 };
+  const deepComet = { x: W * 1.12, y: H * 0.08, vx: -0.25, vy: 0.035, phase: 0, pulse: 0 };
+  const meteor = { active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, next: 600 };
 
   const satellites: Satellite[] = [
-    { x: W * 0.14, y: H * 0.13, vx: 0.055, vy: 0.006, scale: 1, angle: -0.12, phase: 0.3, signal: 0, boost: 0, kind: 0 },
-    { x: W * 0.72, y: H * 0.22, vx: -0.038, vy: -0.004, scale: 0.76, angle: 0.17, phase: 2.2, signal: 0, boost: 0, kind: 1 },
-    { x: W * 0.48, y: H * 0.075, vx: 0.028, vy: 0.002, scale: 0.58, angle: -0.28, phase: 4.1, signal: 0, boost: 0, kind: 2 },
+    { x: W * 0.14, y: H * 0.13, vx: 0.025, vy: 0.003, scale: 0.9, angle: -0.12, phase: 0.3, signal: 0, boost: 0, kind: 0 },
+    { x: W * 0.72, y: H * 0.22, vx: -0.018, vy: -0.002, scale: 0.68, angle: 0.17, phase: 2.2, signal: 0, boost: 0, kind: 1 },
   ];
 
   const rockets: Rocket[] = [
-    { x: -90, y: H * 0.34, vx: 0.38, vy: -0.055, scale: 0.9, phase: 0, boost: 0, kind: 0 },
-    { x: W * 0.84, y: H * 0.46, vx: 0.12, vy: -0.31, scale: 0.68, phase: 1.7, boost: 0, kind: 1 },
+    { x: -90, y: H * 0.34, vx: 0.18, vy: -0.025, scale: 0.8, phase: 0, boost: 0, kind: 0 },
   ];
 
   let auroraPulse = 0;
-  const mists: Mist[] = Array.from({ length: 4 }, (_, i) => ({
+  const mists: Mist[] = Array.from({ length: 2 }, (_, i) => ({
     y: rand(0.74, 0.92), w: rand(0.35, 0.65), x: rand(0, 1),
-    vx: rand(0.0004, 0.0012) * (i % 2 ? 1 : -1), op: rand(0.07, 0.13),
+    vx: rand(0.0002, 0.0006) * (i % 2 ? 1 : -1), op: rand(0.04, 0.08),
     hue: i % 2 ? rand(170, 200) : rand(265, 295),
   }));
 
-  // Горы
+  // Горы (замедлены)
   const makeRidge = (baseRatio: number, amp: number, speed: number): Ridge => {
     const pts: { x: number; y: number }[] = [];
     const n = 9;
     for (let i = 0; i <= n; i++) pts.push({ x: (i / n) * 1.3 - 0.15, y: rand(-1, -0.25) * amp * rand(0.5, 1) });
     return { pts, drift: rand(0, 100), speed, base: baseRatio, amp };
   };
-  const ridgeFar = makeRidge(0.78, 0.17, 0.006);
-  const ridgeNear = makeRidge(0.9, 0.11, 0.011);
+  const ridgeFar = makeRidge(0.78, 0.17, 0.003);
+  const ridgeNear = makeRidge(0.9, 0.11, 0.005);
 
-  // Вода
-  const flows: Flow[] = Array.from({ length: 34 }, () => ({
-    x: rand(0, W), lane: rand(0.925, 0.99), len: rand(20, 70),
-    vx: rand(0.6, 1.8), op: rand(0.25, 0.55), hue: rand(170, 205),
+  // Вода (замедлена)
+  const flows: Flow[] = Array.from({ length: 15 }, () => ({
+    x: rand(0, W), lane: rand(0.925, 0.99), len: rand(15, 45),
+    vx: rand(0.3, 0.9), op: rand(0.15, 0.35), hue: rand(170, 205),
   }));
   const shadows = [
-    { x: rand(0, W), lane: 0.955, vx: 0.5, len: 26, op: 0.3 },
-    { x: rand(0, W), lane: 0.975, vx: -0.4, len: 18, op: 0.24 },
+    { x: rand(0, W), lane: 0.955, vx: 0.25, len: 18, op: 0.15 },
   ];
   const ripples: Ripple[] = [];
   const splashes: Splash[] = [];
-  let nextRipple = 90;
-  const fish = { state: "idle" as "idle" | "jump", t: 0, next: 200, x0: 0, x1: 0, h: 46, swimX: W * 0.5 };
+  let nextRipple = 180;
+  const fish = { state: "idle" as "idle" | "jump", t: 0, next: 400, x0: 0, x1: 0, h: 46, swimX: W * 0.5 };
 
-  // Трава и цветы
-  const blades: Blade[] = Array.from({ length: 110 }, (_, i) => {
-    const near = i < 70;
-    return { x: rand(0, 1), h: near ? rand(10, 26) : rand(7, 16), lean: rand(-0.3, 0.3),
-      phase: rand(0, TAU), op: near ? rand(0.3, 0.55) : rand(0.18, 0.35), hue: rand(95, 155) };
+  // Трава и цветы (количество уменьшено)
+  const blades: Blade[] = Array.from({ length: 60 }, (_, i) => {
+    const near = i < 40;
+    return { x: rand(0, 1), h: near ? rand(8, 20) : rand(6, 12), lean: rand(-0.2, 0.2),
+      phase: rand(0, TAU), op: near ? rand(0.2, 0.4) : rand(0.1, 0.25), hue: rand(95, 145) };
   });
-  const flowers: Flower[] = Array.from({ length: 26 }, () => ({
-    x: rand(0, 1), h: rand(10, 22), phase: rand(0, TAU),
-    hue: pick([330, 50, 275, 10, 190, 300]), r: rand(1.8, 3.2), op: rand(0.4, 0.75), pop: 0,
+  const flowers: Flower[] = Array.from({ length: 10 }, () => ({
+    x: rand(0, 1), h: rand(8, 18), phase: rand(0, TAU),
+    hue: pick([330, 50, 275, 10, 190]), r: rand(1.5, 2.5), op: rand(0.3, 0.55), pop: 0,
   }));
 
   /* ═══════════ interaction state ═══════════ */
@@ -553,10 +536,10 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   };
 
   const drawSatellite = (sat: Satellite, t: number) => {
-    sat.phase += 0.009;
+    sat.phase += 0.004;
     sat.signal *= 0.97;
     sat.boost *= 0.96;
-    sat.x += sat.vx * (1 + sat.boost * 3);
+    sat.x += sat.vx * (1 + sat.boost * 2);
     sat.y += sat.vy;
 
     if (sat.vx >= 0 && sat.x > W + 90) { sat.x = -90; sat.y = rand(H * 0.06, H * 0.28); }
@@ -567,12 +550,12 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
     const panelH = (sat.kind === 2 ? 7 : 9) * s;
     const busW = (sat.kind === 2 ? 10 : 14) * s;
     const busH = (sat.kind === 1 ? 13 : 11) * s;
-    const wobble = Math.sin(t * 0.008 + sat.phase) * 0.025;
+    const wobble = Math.sin(t * 0.004 + sat.phase) * 0.012;
 
     ctx.save();
     ctx.translate(sat.x, sat.y);
     ctx.rotate(sat.angle + wobble);
-    ctx.globalAlpha = 0.3 + sat.signal * 0.2;
+    ctx.globalAlpha = 0.2 + sat.signal * 0.15;
 
     // Тонкие фермы соединяют корпус с солнечными батареями.
     ctx.strokeStyle = "rgba(185,205,225,0.8)";
@@ -659,9 +642,9 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
   };
 
   const drawRocket = (rocket: Rocket, t: number) => {
-    rocket.phase += 0.08;
+    rocket.phase += 0.04;
     rocket.boost *= 0.97;
-    const speed = 1 + rocket.boost * 2.5;
+    const speed = 0.5 + rocket.boost * 1.5;
     rocket.x += rocket.vx * speed;
     rocket.y += rocket.vy * speed;
 
@@ -674,31 +657,30 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
 
     const s = rocket.scale;
     const angle = Math.atan2(rocket.vy, rocket.vx);
-    const flame = (11 + Math.sin(rocket.phase) * 3 + rocket.boost * 10) * s;
+    const flame = (7 + Math.sin(rocket.phase) * 2 + rocket.boost * 6) * s;
 
     // Полупрозрачный выхлоп быстро растворяется и не засоряет чистое небо.
     ctx.save();
-    ctx.globalAlpha = 0.28 + rocket.boost * 0.22;
+    ctx.globalAlpha = 0.15 + rocket.boost * 0.15;
     const tailX = rocket.x - Math.cos(angle) * 18 * s;
     const tailY = rocket.y - Math.sin(angle) * 18 * s;
     const trail = ctx.createLinearGradient(tailX, tailY,
-      tailX - Math.cos(angle) * 62 * s, tailY - Math.sin(angle) * 62 * s);
-    trail.addColorStop(0, "rgba(110,210,255,0.75)");
-    trail.addColorStop(0.35, "rgba(120,150,255,0.2)");
+      tailX - Math.cos(angle) * 40 * s, tailY - Math.sin(angle) * 40 * s);
+    trail.addColorStop(0, "rgba(110,210,255,0.4)");
     trail.addColorStop(1, "rgba(100,120,220,0)");
     ctx.strokeStyle = trail;
-    ctx.lineWidth = 2.2 * s;
+    ctx.lineWidth = 1.5 * s;
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(tailX, tailY);
-    ctx.lineTo(tailX - Math.cos(angle) * 62 * s, tailY - Math.sin(angle) * 62 * s);
+    ctx.lineTo(tailX - Math.cos(angle) * 40 * s, tailY - Math.sin(angle) * 40 * s);
     ctx.stroke();
     ctx.restore();
 
     ctx.save();
     ctx.translate(rocket.x, rocket.y);
     ctx.rotate(angle);
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.2;
 
     // Пламя двигателя.
     const fg = ctx.createLinearGradient(-18 * s - flame, 0, -15 * s, 0);
@@ -765,20 +747,19 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
 
     ctx.clearRect(0, 0, W, H);
 
-    /* ── глубокий космический фон (темнее) ── */
+    /* ── глубокий космический фон (максимально темно) ── */
     {
       const sky = ctx.createLinearGradient(0, 0, 0, H * 0.58);
-      sky.addColorStop(0, "rgba(0,0,5,0.95)");
-      sky.addColorStop(0.42, "rgba(1,2,12,0.88)");
-      sky.addColorStop(0.78, "rgba(2,10,18,0.5)");
-      sky.addColorStop(1, "rgba(4,16,24,0)");
+      sky.addColorStop(0, "rgba(0,0,1,1)");
+      sky.addColorStop(0.42, "rgba(0,0,2,0.98)");
+      sky.addColorStop(0.78, "rgba(0,1,3,0.8)");
+      sky.addColorStop(1, "rgba(0,2,4,0)");
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H * 0.58);
 
       const horizon = ctx.createLinearGradient(0, H * 0.28, 0, H * 0.62);
-      horizon.addColorStop(0, "rgba(25,65,95,0)");
-      horizon.addColorStop(0.62, "rgba(25,65,95,0.06)");
-      horizon.addColorStop(1, "rgba(20,65,75,0)");
+      horizon.addColorStop(0.62, "rgba(10,30,45,0.02)");
+      horizon.addColorStop(1, "rgba(0,10,15,0)");
       ctx.fillStyle = horizon;
       ctx.fillRect(0, H * 0.25, W, H * 0.4);
     }
@@ -849,19 +830,19 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.beginPath(); ctx.arc(x, y, d.r, 0, TAU); ctx.fill();
     }
 
-    /* ── сияние ── */
+    /* ── сияние (приглушено и замедлено) ── */
     auroraPulse *= 0.985;
     ctx.save();
-    for (let band = 0; band < 3; band++) {
-      ctx.globalAlpha = (0.078 - band * 0.016) + Math.sin(t * 0.004 + band) * 0.026 + auroraPulse * 0.18;
+    for (let band = 0; band < 2; band++) {
+      ctx.globalAlpha = (0.04 - band * 0.01) + Math.sin(t * 0.002 + band) * 0.01 + auroraPulse * 0.1;
       ctx.beginPath(); const yTop = H * (0.02 + band * 0.05);
       for (let x = 0; x <= W; x += 36) {
-        const y = yTop + Math.sin(x * 0.004 + t * 0.006 + band) * 28 + Math.sin(x * 0.011 - t * 0.004) * 15;
+        const y = yTop + Math.sin(x * 0.002 + t * 0.003 + band) * 20 + Math.sin(x * 0.006 - t * 0.002) * 10;
         x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
-      for (let x = W; x >= 0; x -= 36) { const y = yTop + H * 0.14 + Math.sin(x * 0.003 + t * 0.005 + 2 + band) * 32; ctx.lineTo(x, y); }
+      for (let x = W; x >= 0; x -= 36) { const y = yTop + H * 0.14 + Math.sin(x * 0.0015 + t * 0.0025 + 2 + band) * 24; ctx.lineTo(x, y); }
       ctx.closePath();
-      const cols = [["rgba(70,255,170,0.95)", "rgba(60,200,255,0)"],["rgba(150,120,255,0.9)", "rgba(80,220,255,0)"],["rgba(255,120,200,0.8)", "rgba(120,160,255,0)"]][band];
+      const cols = [["rgba(70,255,170,0.4)", "rgba(60,200,255,0)"],["rgba(150,120,255,0.35)", "rgba(80,220,255,0)"]][band];
       const ag = ctx.createLinearGradient(0, yTop, 0, yTop + H * 0.2);
       ag.addColorStop(0, cols[0]); ag.addColorStop(1, cols[1]);
       ctx.fillStyle = ag; ctx.fill();
@@ -934,15 +915,15 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       ctx.restore(); hit(x, y, r * 3.6, "Чёрная дыра", () => { blackHole.pulse = 1; });
     }
 
-    /* ── звёзды ── */
+    /* ── звёзды (приглушены) ── */
     for (const s of stars) {
-      s.phase += s.speed; const twinkle = 0.14 + Math.abs(Math.sin(s.phase)) * 0.56;
+      s.phase += s.speed; const twinkle = 0.1 + Math.abs(Math.sin(s.phase)) * 0.4;
       ctx.save(); ctx.globalAlpha = twinkle;
-      const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
-      sg.addColorStop(0, `hsla(${s.hue},85%,80%,1)`); sg.addColorStop(1, `hsla(${s.hue},85%,70%,0)`);
-      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 4, 0, TAU); ctx.fill();
-      ctx.fillStyle = `hsla(${s.hue},60%,95%,1)`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
-      if (s.r > 1.52) {
+      const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 3);
+      sg.addColorStop(0, `hsla(${s.hue},85%,70%,0.8)`); sg.addColorStop(1, `hsla(${s.hue},85%,60%,0)`);
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3, 0, TAU); ctx.fill();
+      ctx.fillStyle = `hsla(${s.hue},40%,90%,0.9)`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+      if (s.r > 1.25) {
         const spike = s.r * (3.2 + Math.abs(Math.sin(s.phase * 0.7)) * 2.2);
         ctx.globalAlpha = twinkle * 0.38; ctx.lineWidth = 0.65;
         const hg = ctx.createLinearGradient(s.x - spike, s.y, s.x + spike, s.y);
@@ -1464,54 +1445,7 @@ export function createNatureWorld(canvas: HTMLCanvasElement, opts: WorldOptions 
       });
     }
 
-    /* ── волк ── */
-    {
-      const wv = wolf;
-      wv.howl *= 0.985;
-      if (wv.pause > 0) wv.pause--;
-      else {
-        wv.phase += 0.045; wv.x += wv.dir * 0.42;
-        if (Math.random() < 0.004) { wv.pause = Math.floor(rand(120, 320)); }
-      }
-      if (wv.x > W * 0.45) wv.dir = -1;
-      if (wv.x < 40) wv.dir = 1;
-      const s = 26;
-      const gy = meadowY + 11;
-      const leg = wv.pause > 0 ? 0 : Math.sin(wv.phase) * 4;
-      const leg2 = wv.pause > 0 ? 0 : Math.sin(wv.phase + Math.PI) * 4;
-      const headUp = wv.howl;
-      ctx.save();
-      ctx.translate(wv.x, gy); ctx.scale(wv.dir, 1);
-      ctx.globalAlpha = 0.55 + wv.howl * 0.35;
-      const col = "rgba(150,165,205,0.95)";
-      ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.lineCap = "round";
-      ctx.beginPath(); ctx.moveTo(s*0.3,-s*0.2); ctx.lineTo(s*0.3+leg,0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(s*0.36,-s*0.22); ctx.lineTo(s*0.36+leg2,0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-s*0.3,-s*0.2); ctx.lineTo(-s*0.3+leg2,0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-s*0.36,-s*0.22); ctx.lineTo(-s*0.36+leg,0); ctx.stroke();
-      ctx.beginPath(); ctx.ellipse(0,-s*0.4,s*0.5,s*0.2,0,0,TAU); ctx.fill();
-      // хвост
-      ctx.beginPath();
-      ctx.moveTo(-s*0.46,-s*0.44);
-      ctx.quadraticCurveTo(-s*0.82,-s*0.5-Math.sin(t*0.05)*3,-s*0.9,-s*0.72);
-      ctx.quadraticCurveTo(-s*0.7,-s*0.42,-s*0.44,-s*0.3);
-      ctx.closePath(); ctx.fill();
-      // шея + голова (задирается при вое)
-      const hx = s * 0.52, hy = -s * (0.62 + headUp * 0.3);
-      ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.moveTo(s*0.36,-s*0.45); ctx.lineTo(hx, hy); ctx.stroke();
-      ctx.beginPath(); ctx.ellipse(hx, hy, s*0.19, s*0.13, -0.5 - headUp * 0.5, 0, TAU); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(hx - s*0.12, hy - s*0.1); ctx.lineTo(hx - s*0.06, hy - s*0.28); ctx.lineTo(hx + s*0.04, hy - s*0.1); ctx.closePath(); ctx.fill();
-      // светящийся глаз
-      ctx.fillStyle = `rgba(140,255,230,${0.8 + wv.howl * 0.2})`;
-      ctx.beginPath(); ctx.arc(hx + s*0.08, hy - s*0.02, 1.9 + wv.howl, 0, TAU); ctx.fill();
-      ctx.restore();
-      hit(wv.x + s * 0.3, gy - s * 0.6, s * 1.0, "Волк", () => {
-        wv.howl = 1; wv.pause = 180;
-        for (let i = 0; i < 3; i++) ring(wv.x + s * 0.55 * wv.dir, gy - s * 0.95, 200 + i * 20, 90 + i * 55, 0.016);
-        notes(wv.x + s * 0.5 * wv.dir, gy - s * 1.1, 200, 4);
-      });
-    }
+
 
     /* ── ручей ── */
     {

@@ -40,7 +40,7 @@ const MOBILE_SECTIONS = [
 function DesktopPage() {
   return (
     <PageTransition>
-      <main className="relative overflow-hidden bg-[#060606]">
+      <main className="relative overflow-hidden bg-[#020202]">
         <ParticleBackground />
         <NatureOverlay />
         <CursorGlow />
